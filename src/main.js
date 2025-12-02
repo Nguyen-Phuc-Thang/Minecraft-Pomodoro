@@ -1,35 +1,17 @@
-console.log("main.js loaded");
+import Phaser from "phaser";
+import BuildScene from "./scenes/BuildScene.js";
 
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-import { db } from "./firebase/firebaseConfig.js";
+const GAME_WIDTH = 1280;
+const GAME_HEIGHT = 720;
 
-async function test() {
-    const userId = "demoUser";
-    const userRef = doc(db, "users", userId);
+const config = {
+  type: Phaser.WEBGL,
+  width: GAME_WIDTH,
+  height: GAME_HEIGHT,
+  parent: "game-container",
+  scene: [
+    BuildScene, 
+  ],
+};
 
-    console.log("Appending item...");
-
-    try {
-        await updateDoc(userRef, {
-            blocksOwned: {
-                type: "stone",
-                quantity: 1
-            }
-        });
-
-        console.log("Update success!");
-
-        const snap = await getDoc(userRef);
-        console.log("Updated data:", snap.data());
-
-    } catch (err) {
-        console.error("ERROR during update:", err);
-    }
-}
-
-test();
+new Phaser.Game(config);
