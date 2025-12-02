@@ -1,17 +1,18 @@
 import Phaser from "phaser";
 import BuildScene from "./scenes/BuildScene.js";
-
-const GAME_WIDTH = 1280;
-const GAME_HEIGHT = 720;
+import PreloadScene from "./scenes/PreloadScene.js";
 
 const config = {
-  type: Phaser.WEBGL,
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  type: Phaser.AUTO,
   parent: "game-container",
-  scene: [
-    BuildScene, 
-  ],
+  width: 1280,
+  height: 640,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  scene: [PreloadScene, BuildScene],
 };
+
 
 new Phaser.Game(config);
