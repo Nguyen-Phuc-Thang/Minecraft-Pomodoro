@@ -1,21 +1,21 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAGIUjPcGj1MNyC1aBMezDl844Vv66a0W8",
-  authDomain: "minecraft-pomodoro.firebaseapp.com",
-  projectId: "minecraft-pomodoro",
-  storageBucket: "minecraft-pomodoro.firebasestorage.app",
-  messagingSenderId: "403869075824",
-  appId: "1:403869075824:web:03b4fca5fd65bce2cf67b5",
-  measurementId: "G-B2HPTNGXQW"
+  apiKey: "AIzaSyD7tGj3VUAfpr10mWfcZpugtM4hJuYq5j4",
+  authDomain: "minecraft-pomodoro-92243.firebaseapp.com",
+  projectId: "minecraft-pomodoro-92243",
+  storageBucket: "minecraft-pomodoro-92243.firebasestorage.app",
+  messagingSenderId: "303330726334",
+  appId: "1:303330726334:web:96c2964b91eb989c56a9ef",
+  measurementId: "G-F8T1MLW197"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const analytics = getAnalytics(app);
