@@ -52,5 +52,22 @@ export default class BuildScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScale(btnScale)
       .setInteractive({ useHandCursor: true });
+
+    const invWidth = barWidth;   
+    const invHeight = 1356;        
+    const invScale = barScale;    
+    const invGap = 10;            
+    const invX = barX;
+    const invY = barY
+      - (barHeight * barScale) / 2   
+      - (invHeight * invScale) / 2   
+      - invGap;               
+
+    this.inventoryPanel = this.add
+      .image(invX, invY, "inventory_panel") 
+      .setOrigin(0.5)
+      .setScale(invScale)
+      .setVisible(true); 
+
   }
 }
