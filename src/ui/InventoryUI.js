@@ -58,12 +58,6 @@ export default class InventoryUI {
     this.invLeftScreen = invLeftScreen;
     this.invTopScreen = invTopScreen;
 
-    const grassSource = scene.textures.get("grass").getSourceImage();
-    const grassScale = Math.min(
-      (invSlotWidth * 0.8) / grassSource.width,
-      (invSlotHeight * 0.8) / grassSource.height
-    );
-
     this.inventoryItems = [];
 
     this.inventorySelection = scene.add
@@ -84,32 +78,40 @@ export default class InventoryUI {
 
     const self = this;
 
-    for (let row = 0; row < invRows; row++) {
-      for (let col = 0; col < invCols; col++) {
-        const x = invLeftScreen + invSlotWidth / 2 + col * invSlotWidth;
-        const y = invTopScreen + invSlotHeight / 2 + row * invSlotHeight / 1.2;
+    this.createIcon = function (row, col, textureKey) {
+      const x = self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
+      const y =
+        self.invTopScreen +
+        self.invSlotHeight / 2 +
+        row * self.invSlotHeight / 1.2;
 
-        const icon = scene.add
-          .image(x, y, "grass")
-          .setOrigin(0.5)
-          .setScale(grassScale)
-          .setDepth(4)
-          .setVisible(false)
-          .setInteractive({ useHandCursor: true });
+      const source = scene.textures.get(textureKey).getSourceImage();
+      const scale = Math.min(
+        (self.invSlotWidth * 0.8) / source.width,
+        (self.invSlotHeight * 0.8) / source.height
+      );
 
-        icon.invRow = row;
-        icon.invCol = col;
-        icon.location = "inventory";
-        icon.hotbarIndex = null;
+      const icon = scene.add
+        .image(x, y, textureKey)
+        .setOrigin(0.5)
+        .setScale(scale)
+        .setDepth(4)
+        .setVisible(false)
+        .setInteractive({ useHandCursor: true });
 
-        icon.on("pointerdown", function () {
-          self.selectInventorySlot(this.invRow, this.invCol);
-          self.itemSystem.handleInventoryClick(this);
-        });
+      icon.invRow = row;
+      icon.invCol = col;
+      icon.location = "inventory";
+      icon.hotbarIndex = null;
+      icon.blockType = textureKey;
 
-        this.inventoryItems.push(icon);
-      }
-    }
+      icon.on("pointerdown", function () {
+        self.selectInventorySlot(this.invRow, this.invCol);
+        self.itemSystem.handleInventoryClick(this);
+      });
+
+      self.inventoryItems.push(icon);
+    };
 
     hotbarUI.inventoryButton.on("pointerdown", () => {
       const show = !this.inventoryPanel.visible;
@@ -156,11 +158,28 @@ export default class InventoryUI {
 
     this.inventorySelection.setVisible(show);
 
-    if (show) {
+    if (show && this.inventoryItems.length > 0) {
       this.selectInventorySlot(
-        this.selectedInventoryRow,
-        this.selectedInventoryCol
+        this.inventoryItems[0].invRow,
+        this.inventoryItems[0].invCol
       );
+    }
+  }
+
+  setItems(itemTypes) {
+    for (let i = 0; i < this.inventoryItems.length; i++) {
+      this.inventoryItems[i].destroy();
+    }
+    this.inventoryItems = [];
+
+    const maxSlots = this.invRows * this.invCols;
+    const count = Math.min(itemTypes.length, maxSlots);
+
+    for (let i = 0; i < count; i++) {
+      const type = itemTypes[i];
+      const row = Math.floor(i / this.invCols);
+      const col = i % this.invCols;
+      this.createIcon(row, col, type);
     }
   }
 

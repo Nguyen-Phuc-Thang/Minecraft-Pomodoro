@@ -16,6 +16,19 @@ export default class BuildScene extends Phaser.Scene {
 
     this.hotbarUI = new HotbarUI(this, this.itemSystem);
     this.inventoryUI = new InventoryUI(this, this.itemSystem, this.hotbarUI);
+    this.inventoryUI.setItems([
+      "grass",
+      "dirt",
+      "stone",
+      "oak_planks",
+      "oak_wood",
+      "obsidian",
+      "bricks",
+      "sand",
+      "TNT",
+      "grass"
+    ]);
+
 
     this.itemSystem.registerHotbarUI(this.hotbarUI);
     this.itemSystem.registerInventoryUI(this.inventoryUI);
