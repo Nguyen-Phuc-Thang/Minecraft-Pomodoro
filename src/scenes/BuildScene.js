@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import HotbarUI from "../ui/HotbarUI.js";
 import InventoryUI from "../ui/InventoryUI.js";
 import ItemSystem from "../systems/ItemSystem.js";
+import BlockBuildUI from "../ui/BlockBuildUI.js";
 
 export default class BuildScene extends Phaser.Scene {
   constructor() {
@@ -18,5 +19,6 @@ export default class BuildScene extends Phaser.Scene {
 
     this.itemSystem.registerHotbarUI(this.hotbarUI);
     this.itemSystem.registerInventoryUI(this.inventoryUI);
+    this.blockBuildUI = new BlockBuildUI(this, this.hotbarUI);
   }
 }

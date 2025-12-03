@@ -13,6 +13,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("inventory_panel", "assets/ui/inventory_panel.png");
 
     this.load.image("grass", "assets/blocks/grass.png");
+    this.load.image("dirt", "assets/blocks/dirt.png");
+    this.load.image("bedrock", "assets/blocks/bedrock.png");
   }
 
   create() {
