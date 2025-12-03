@@ -20,5 +20,25 @@ export default class BuildScene extends Phaser.Scene {
     this.itemSystem.registerHotbarUI(this.hotbarUI);
     this.itemSystem.registerInventoryUI(this.inventoryUI);
     this.blockBuildUI = new BlockBuildUI(this, this.hotbarUI);
+
+    this.currentTool = "build";
+
+    this.hotbarUI.buildButton.on("pointerdown", () => {
+      this.currentTool = "build";
+    });
+
+    this.hotbarUI.removeButton.on("pointerdown", () => {
+      this.currentTool = "remove";
+    });
+
+    this.blockBuildUI.onCellClick = ({ x, y, type }) => {
+      if (this.currentTool === "build") {
+        if (!type) {
+          this.blockBuildUI.placeBlock(x, y, "dirt");
+        }
+      } else if (this.currentTool === "remove") {
+        this.blockBuildUI.removeBlock(x, y);
+      }
+    };
   }
 }

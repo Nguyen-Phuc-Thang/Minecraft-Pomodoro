@@ -2,7 +2,7 @@ export default class BlockBuildUI {
   constructor(scene, hotbarUI) {
     this.scene = scene;
 
-    const width = scene.scale.width;
+    const width = scene.scale.width - 5;
     const barHeight = hotbarUI.barHeight;
     const barScale = hotbarUI.barScale;
     const barY = hotbarUI.barY;
@@ -153,5 +153,20 @@ export default class BlockBuildUI {
     if (!visible) {
       this.hoverHighlight.setVisible(false);
     }
+  }
+
+  removeBlock(x, y) {
+    const cell = this.getCell(x, y);    
+    if (!cell) return false;
+    if (!cell.type || cell.type === "bedrock") return false;
+
+    if (cell.sprite) {
+      cell.sprite.destroy();           
+      cell.sprite = null;              
+    }
+
+    cell.type = null;                   
+
+    return true;
   }
 }
