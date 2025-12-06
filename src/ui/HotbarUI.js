@@ -28,6 +28,10 @@ export default class HotbarUI {
     const numSlots = 14;
     this.numSlots = numSlots;
 
+    this.hotbarItemSprites = new Array(numSlots).fill(null);
+    this.storedItems = new Array(numSlots).fill(null);
+    this.hotbarCountTexts = new Array(numSlots).fill(null);
+
     const slotWidth = (barWidth / numSlots) * barScale - 3.1;
     const slotHeight = barHeight * barScale;
     this.slotWidth = slotWidth;
@@ -106,8 +110,6 @@ export default class HotbarUI {
       .setInteractive({ useHandCursor: true })
       .setDepth(2);
 
-    this.hotbarItemSprites = new Array(numSlots).fill(null);
-
     this.selectSlot(0);
   }
 
@@ -124,5 +126,65 @@ export default class HotbarUI {
       x: slot.x,
       y: this.barY
     };
+  }
+
+  setSlotItem(index, item) {
+    if (index < 0 || index >= this.numSlots) return;
+    this.storedItems[index] = item;
+  }
+
+  getSlotItem(index) {
+    if (index < 0 || index >= this.numSlots) return null;
+    return this.storedItems[index];
+  }
+
+  getSelectedItem() {
+    return this.getSlotItem(this.selectedSlotIndex);
+  }
+
+  getSelectedItemType() {
+    const item = this.getSelectedItem();
+    return item ? item.type : null;
+  }
+
+  getSelectedItemCount() {
+    const item = this.getSelectedItem();
+    return item ? item.count : 0;
+  }
+
+  refreshCounts() {
+    for (let i = 0; i < this.numSlots; i++) {
+      const item = this.storedItems[i];
+      const slot = this.hotbarSlots[i];
+      let textObj = this.hotbarCountTexts[i];
+
+      if (item && item.count > 0) {
+        const textX = slot.x + this.slotWidth / 2 - 4;
+        const textY = this.barY + this.slotHeight / 2 - 12;
+
+        if (!textObj) {
+          textObj = this.scene.add
+            .text(textX, textY, String(item.count), {
+              fontFamily: "Arial",
+              fontSize: "14px",
+              color: "#ffffff"
+            })
+            .setOrigin(1, 1)
+            .setDepth(5);
+
+          textObj.setStroke("#000000", 4);
+          this.hotbarCountTexts[i] = textObj;
+        } else {
+          textObj.setText(String(item.count));
+          textObj.setPosition(textX, textY);
+          textObj.setVisible(true);
+        }
+      } else {
+        if (textObj) {
+          textObj.destroy();
+          this.hotbarCountTexts[i] = null;
+        }
+      }
+    }
   }
 }

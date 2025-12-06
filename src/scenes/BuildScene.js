@@ -15,6 +15,7 @@ import BlockBuildUI from "../ui/BlockBuildUI.js";
 export default class BuildScene extends Phaser.Scene {
   constructor() {
     super("BuildScene");
+    this.inventoryData = []; // will hold the array from Firestore
   }
 
   async loadInventoryFromDB() {
@@ -23,14 +24,16 @@ export default class BuildScene extends Phaser.Scene {
 
     if (!snap.exists()) {
       console.warn("User not found:", this.userId);
+      this.inventoryData = [];
       this.inventoryUI.setItems([]);
       return;
     }
 
     const data = snap.data();
-    const inventory = data.inventory || [];
+    this.inventoryData = data.inventory || [];
 
-    this.inventoryUI.setItems(inventory);
+    // Pass the same array reference into InventoryUI
+    this.inventoryUI.setItems(this.inventoryData);
   }
 
   setupInventoryRealtime() {
@@ -40,11 +43,12 @@ export default class BuildScene extends Phaser.Scene {
       if (!snap.exists()) return;
 
       const data = snap.data();
-      const inventory = data.inventory || [];
+      this.inventoryData = data.inventory || [];
 
-      this.inventoryUI.setItems(inventory);
+      this.inventoryUI.setItems(this.inventoryData);
     });
   }
+
   init(data) {
     this.userId = data.userId;
     console.log("Loaded userId:", this.userId);
@@ -53,19 +57,21 @@ export default class BuildScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor(0xaecbff);
 
+    if (this.input.mouse) {
+      this.input.mouse.disableContextMenu(); 
+    }
+
     this.itemSystem = new ItemSystem(this);
 
     this.hotbarUI = new HotbarUI(this, this.itemSystem);
     this.inventoryUI = new InventoryUI(this, this.itemSystem, this.hotbarUI);
+
     console.log("Fetching inventory for userId:", this.userId);
     this.loadInventoryFromDB();
-    this.setupInventoryRealtime();
-
-
     this.itemSystem.registerHotbarUI(this.hotbarUI);
     this.itemSystem.registerInventoryUI(this.inventoryUI);
     this.blockBuildUI = new BlockBuildUI(this, this.hotbarUI);
-    
+
     this.currentTool = "build";
 
     this.hotbarUI.buildButton.on("pointerdown", () => {
@@ -78,8 +84,14 @@ export default class BuildScene extends Phaser.Scene {
 
     this.blockBuildUI.onCellClick = ({ x, y, type }) => {
       if (this.currentTool === "build") {
+        const selectedItem = this.hotbarUI.getSelectedItem();
+
+        if (!selectedItem || selectedItem.count <= 0) {
+          return;
+        }
+
         if (!type) {
-          this.blockBuildUI.placeBlock(x, y, "dirt");
+          this.blockBuildUI.placeBlock(x, y, selectedItem.type);
         }
       } else if (this.currentTool === "remove") {
         this.blockBuildUI.removeBlock(x, y);

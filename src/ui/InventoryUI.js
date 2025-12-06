@@ -60,26 +60,15 @@ export default class InventoryUI {
 
     this.inventoryItems = [];
 
-    this.inventorySelection = scene.add
-      .rectangle(
-        invLeftScreen + invSlotWidth / 2,
-        invTopScreen + invSlotHeight / 2,
-        invSlotWidth - 6,
-        invSlotHeight - 18
-      )
-      .setOrigin(0.5)
-      .setStrokeStyle(4, 0xffffff)
-      .setFillStyle(0x000000, 0)
-      .setDepth(5)
-      .setVisible(false);
-
-    this.selectedInventoryRow = 0;
-    this.selectedInventoryCol = 0;
 
     const self = this;
 
-    this.createIcon = function (row, col, textureKey, count) {
-      const x = self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
+    this.createIcon = function (row, col, item) {
+      const textureKey = item.type;
+      const count = item.count;
+
+      const x =
+        self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
       const y =
         self.invTopScreen +
         self.invSlotHeight / 2 +
@@ -99,62 +88,47 @@ export default class InventoryUI {
         .setVisible(false)
         .setInteractive({ useHandCursor: true });
 
-      // === stack count text (Minecraft-style) ===
       const countText = scene.add
         .text(
-          x + self.invSlotWidth / 2 - 4,   // bottom-right corner
+          x + self.invSlotWidth / 2 - 4,
           y + self.invSlotHeight / 2 - 4,
           String(count),
           {
-            fontFamily: "Arial",           // or your Minecraft font
+            fontFamily: "Arial",
             fontSize: "14px",
             color: "#ffffff"
           }
         )
-        .setOrigin(1, 1)                   // bottom-right align
+        .setOrigin(1, 1)
         .setDepth(5)
         .setVisible(false);
 
-      countText.setStroke("#000000", 4);   // black outline like MC
+      countText.setStroke("#000000", 4);
 
       icon.invRow = row;
       icon.invCol = col;
       icon.location = "inventory";
       icon.hotbarIndex = null;
       icon.blockType = textureKey;
-      icon.stackCount = count;             // logic value
-      icon.countText = countText;          // UI text object
 
-      icon.on("pointerdown", function () {
-        self.selectInventorySlot(this.invRow, this.invCol);
-        self.itemSystem.handleInventoryClick(this);
+      icon.dataItem = item;
+      icon.stackCount = item.count;
+      icon.countText = countText;
+
+      icon.on("pointerdown", function (pointer) {
+        if (pointer.leftButtonDown()) {
+          self.itemSystem.handleInventoryLeftClick(this);
+        } else {
+        }
       });
 
       self.inventoryItems.push(icon);
     };
 
-
     hotbarUI.inventoryButton.on("pointerdown", () => {
       const show = !this.inventoryPanel.visible;
       this.setInventoryVisible(show);
     });
-  }
-
-  selectInventorySlot(row, col) {
-    const r = ((row % this.invRows) + this.invRows) % this.invRows;
-    const c = ((col % this.invCols) + this.invCols) % this.invCols;
-
-    this.selectedInventoryRow = r;
-    this.selectedInventoryCol = c;
-
-    const x =
-      this.invLeftScreen + this.invSlotWidth / 2 + c * this.invSlotWidth;
-    const y =
-      this.invTopScreen +
-      this.invSlotHeight / 2 +
-      r * this.invSlotHeight / 1.2;
-
-    this.inventorySelection.setPosition(x, y);
   }
 
   getCellPosition(row, col) {
@@ -178,19 +152,9 @@ export default class InventoryUI {
       }
     }
 
-    this.inventorySelection.setVisible(show);
-
-    if (show && this.inventoryItems.length > 0) {
-      this.selectInventorySlot(
-        this.inventoryItems[0].invRow,
-        this.inventoryItems[0].invCol
-      );
-    }
   }
 
-
   setItems(items) {
-    // clear old icons + text
     for (let i = 0; i < this.inventoryItems.length; i++) {
       const icon = this.inventoryItems[i];
       if (icon.countText) icon.countText.destroy();
@@ -205,10 +169,19 @@ export default class InventoryUI {
       const item = items[i];
       const row = Math.floor(i / this.invCols);
       const col = i % this.invCols;
-      this.createIcon(row, col, item.type, item.count);
+      this.createIcon(row, col, item);
     }
   }
 
+  refreshCounts() {
+    for (let i = 0; i < this.inventoryItems.length; i++) {
+      const icon = this.inventoryItems[i];
+      const dataItem = icon.dataItem;
+      if (icon.countText && dataItem) {
+        icon.countText.setText(String(dataItem.count));
+      }
+    }
+  }
 
   isOpen() {
     return this.inventoryPanel.visible;
