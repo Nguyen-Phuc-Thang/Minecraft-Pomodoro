@@ -82,31 +82,62 @@ export default class HotbarUI {
     const btnSize = 636;
     const btnScale = 0.16;
     const btnWidth = btnSize * btnScale;
-    const gap = 35;
+    const gap = 10;
 
     const totalBtnWidth = btnWidth * 3 + gap * 2;
     const rightMargin = 20;
-    const firstBtnX = width - rightMargin - totalBtnWidth + btnWidth / 2;
+    const firstBtnX = width - rightMargin - totalBtnWidth + btnWidth / 2 - 20;
     const btnY = barY;
 
-    this.buildButton = scene.add
-      .image(firstBtnX, btnY, "build_button")
+    this.buildFrames = [
+      "build_button1",
+      "build_button4"
+    ];
+
+    this.isBuildMode = true;
+    this.currentTool = "build";
+    this.isAnimatingMode = false;
+
+    this.buildModeButton = scene.add
+      .image(firstBtnX, btnY, this.buildFrames[0])
       .setOrigin(0.5)
-      .setScale(btnScale)
+      .setScale(btnScale * 30)
       .setInteractive({ useHandCursor: true })
       .setDepth(2);
 
-    this.removeButton = scene.add
-      .image(firstBtnX + btnWidth + gap, btnY, "remove_button")
-      .setOrigin(0.5)
-      .setScale(btnScale)
-      .setInteractive({ useHandCursor: true })
-      .setDepth(2);
+    this.buildModeButton.on("pointerdown", () => {
+      if (this.isAnimatingMode) return;
+      this.isAnimatingMode = true;
+
+      const frames = this.isBuildMode
+        ? this.buildFrames
+        : [...this.buildFrames].reverse();
+
+      let fIndex = 0;
+
+      this.scene.time.addEvent({
+        delay: 10,
+        repeat: frames.length - 1,
+        callback: () => {
+          this.buildModeButton.setTexture(frames[fIndex]);
+          fIndex++;
+
+          if (fIndex >= frames.length) {
+            this.isAnimatingMode = false;
+            this.isBuildMode = !this.isBuildMode;
+            this.currentTool = this.isBuildMode ? "build" : "remove";
+          }
+        }
+      });
+    });
+
+
+
 
     this.inventoryButton = scene.add
-      .image(firstBtnX + (btnWidth + gap) * 2, btnY, "inventory_button")
+      .image(firstBtnX + (btnWidth + gap) * 1.8, btnY, "inventory_button")
       .setOrigin(0.5)
-      .setScale(btnScale)
+      .setScale(btnScale * 15)
       .setInteractive({ useHandCursor: true })
       .setDepth(2);
 

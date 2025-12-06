@@ -40,6 +40,19 @@ export default class InventoryUI {
       .setVisible(false)
       .setDepth(3);
 
+    const buyX =
+  
+    this.invX + (this.invWidth * this.invScale) / 2 + 220; 
+    const buyY = this.hotbarUI.barY - this.hotbarUI.slotHeight - 50; 
+
+    this.buyButton = scene.add
+      .image(buyX, buyY, "buy_button") 
+      .setOrigin(0.5)
+      .setScale(this.invScale * 25)  
+      .setInteractive({ useHandCursor: true })
+      .setDepth(4)
+      .setVisible(false);  
+
     const invRows = 3;
     const invCols = 14;
 
@@ -128,6 +141,9 @@ export default class InventoryUI {
     hotbarUI.inventoryButton.on("pointerdown", () => {
       const show = !this.inventoryPanel.visible;
       this.setInventoryVisible(show);
+
+      const key = show ? "inventory_button1" : "inventory_button";
+      this.hotbarUI.inventoryButton.setTexture(key);
     });
   }
 
@@ -152,6 +168,10 @@ export default class InventoryUI {
       }
     }
 
+    const key = show ? "inventory_button1" : "inventory_button";
+    this.hotbarUI.inventoryButton.setTexture(key);
+
+    this.buyButton.setVisible(show);
   }
 
   setItems(items) {

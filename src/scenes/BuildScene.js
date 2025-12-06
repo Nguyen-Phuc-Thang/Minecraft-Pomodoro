@@ -16,6 +16,7 @@ export default class BuildScene extends Phaser.Scene {
   constructor() {
     super("BuildScene");
     this.inventoryData = [];
+    this.money = 0;
   }
 
   async loadInventoryFromDB() {
@@ -25,15 +26,20 @@ export default class BuildScene extends Phaser.Scene {
     if (!snap.exists()) {
       console.warn("User not found:", this.userId);
       this.inventoryData = [];
+      this.money = 0;
       this.inventoryUI.setItems([]);
       return;
     }
 
     const data = snap.data();
     this.inventoryData = data.inventory || [];
+    this.money = data.money ?? 0;
+
+    console.log("Loaded inventory for userId:", this.userId, this.inventoryData, "Money:", this.money);
 
     this.inventoryUI.setItems(this.inventoryData);
   }
+
 
   setupInventoryRealtime() {
     const userRef = doc(db, "users", this.userId);
@@ -71,44 +77,61 @@ export default class BuildScene extends Phaser.Scene {
     this.itemSystem.registerInventoryUI(this.inventoryUI);
     this.blockBuildUI = new BlockBuildUI(this, this.hotbarUI);
 
-    this.currentTool = "build";
-
-    this.hotbarUI.buildButton.on("pointerdown", () => {
-      this.currentTool = "build";
-    });
-
-    this.hotbarUI.removeButton.on("pointerdown", () => {
-      this.currentTool = "remove";
-    });
 
     this.blockBuildUI.onCellClick = async ({ x, y, type }) => {
-      if (this.currentTool === "build") {
+      const tool = this.hotbarUI.currentTool || "build";
+
+      if (tool === "build") {
         const selectedItem = this.hotbarUI.getSelectedItem();
 
-        if (!selectedItem || selectedItem.count <= 0) {
-          return;
-        }
+        if (!selectedItem || selectedItem.count <= 0) return;
 
         if (!type) {
           this.blockBuildUI.placeBlock(x, y, selectedItem.type);
 
           selectedItem.count -= 1;
-
           this.inventoryUI.refreshCounts();
           this.hotbarUI.refreshCounts();
 
           try {
             const userRef = doc(db, "users", this.userId);
-            await updateDoc(userRef, {
-              inventory: this.inventoryData  
-            });
+            await updateDoc(userRef, { inventory: this.inventoryData });
           } catch (err) {
             console.error("Failed to update inventory in Firestore:", err);
           }
         }
-      } else if (this.currentTool === "remove") {
+      } else if (tool === "remove") {
         this.blockBuildUI.removeBlock(x, y);
       }
     };
+
+    this.inventoryUI.buyButton.on("pointerdown", async () => {
+      const selectedItem = this.hotbarUI.getSelectedItem();
+      if (!selectedItem) return;
+
+      const price = selectedItem.price ?? 0;
+      if (this.money < price || price <= 0) {
+        console.log("Not enough money or invalid price");
+        return;
+      }
+
+      this.money -= price;
+
+
+      selectedItem.count += 1;
+
+      this.inventoryUI.refreshCounts();
+      this.hotbarUI.refreshCounts();
+      try {
+        const userRef = doc(db, "users", this.userId);
+        await updateDoc(userRef, {
+          money: this.money,
+          inventory: this.inventoryData
+        });
+      } catch (err) {
+        console.error("Failed to update money/inventory:", err);
+      }
+    });
+
   }
 }
