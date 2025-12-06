@@ -15,7 +15,7 @@ import BlockBuildUI from "../ui/BlockBuildUI.js";
 export default class BuildScene extends Phaser.Scene {
   constructor() {
     super("BuildScene");
-    this.inventoryData = []; // will hold the array from Firestore
+    this.inventoryData = [];
   }
 
   async loadInventoryFromDB() {
@@ -32,7 +32,6 @@ export default class BuildScene extends Phaser.Scene {
     const data = snap.data();
     this.inventoryData = data.inventory || [];
 
-    // Pass the same array reference into InventoryUI
     this.inventoryUI.setItems(this.inventoryData);
   }
 
@@ -58,7 +57,7 @@ export default class BuildScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(0xaecbff);
 
     if (this.input.mouse) {
-      this.input.mouse.disableContextMenu(); 
+      this.input.mouse.disableContextMenu();
     }
 
     this.itemSystem = new ItemSystem(this);
@@ -82,7 +81,7 @@ export default class BuildScene extends Phaser.Scene {
       this.currentTool = "remove";
     });
 
-    this.blockBuildUI.onCellClick = ({ x, y, type }) => {
+    this.blockBuildUI.onCellClick = async ({ x, y, type }) => {
       if (this.currentTool === "build") {
         const selectedItem = this.hotbarUI.getSelectedItem();
 
@@ -92,6 +91,20 @@ export default class BuildScene extends Phaser.Scene {
 
         if (!type) {
           this.blockBuildUI.placeBlock(x, y, selectedItem.type);
+
+          selectedItem.count -= 1;
+
+          this.inventoryUI.refreshCounts();
+          this.hotbarUI.refreshCounts();
+
+          try {
+            const userRef = doc(db, "users", this.userId);
+            await updateDoc(userRef, {
+              inventory: this.inventoryData  
+            });
+          } catch (err) {
+            console.error("Failed to update inventory in Firestore:", err);
+          }
         }
       } else if (this.currentTool === "remove") {
         this.blockBuildUI.removeBlock(x, y);
