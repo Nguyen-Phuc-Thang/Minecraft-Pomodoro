@@ -1,8 +1,20 @@
-export default class InventoryUI {
-  constructor(scene, itemSystem, hotbarUI) {
+export default class InventoryUI {  
+
+  
+    constructor(scene, itemSystem, hotbarUI) {
     this.scene = scene;
     this.itemSystem = itemSystem;
     this.hotbarUI = hotbarUI;
+
+    this.uiStyle = {
+      baseColor: 0x2c3e50,
+      accentColor: 0x34495e,
+      hoverColor: 0x3498db,
+      textColor: '#ecf0f1',
+      successColor: 0x27ae60,
+      font: '16px "Minecraft"',
+      cornerRadius: 10
+    };
 
     const width = scene.scale.width;
     const height = scene.scale.height;
@@ -40,6 +52,62 @@ export default class InventoryUI {
       .setVisible(false)
       .setDepth(3);
 
+    const buyX =
+      this.invX + (this.invWidth * this.invScale) / 2 + 220;
+    const buyY = this.hotbarUI.barY - this.hotbarUI.slotHeight - 50;
+
+    const buyWidth = 150;
+    const buyHeight = 100;
+    const buyRadius = 20;
+
+    this.buyButton = scene.add
+      .container(buyX, buyY)
+      .setDepth(4)
+      .setVisible(false);
+
+    const buyBg = scene.add.graphics();
+    buyBg.lineStyle(2, 0xffffff, 1);
+    buyBg.fillStyle(0x7f8c8d, 1);
+    buyBg.fillRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+    buyBg.strokeRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+
+    this.buyButton.on("pointerover", () => {
+      buyBg.clear();
+      buyBg.lineStyle(2, 0xffffff, 1);
+      buyBg.fillStyle(0x95a5a6, 1);
+      buyBg.fillRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+      buyBg.strokeRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+    });
+
+    this.buyButton.on("pointerout", () => {
+      buyBg.clear();
+      buyBg.lineStyle(2, 0xffffff, 1);
+      buyBg.fillStyle(0x7f8c8d, 1);
+      buyBg.fillRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+      buyBg.strokeRoundedRect(-buyWidth / 2, -buyHeight / 2, buyWidth, buyHeight, buyRadius);
+    });
+
+    this.buyPriceText = scene.add
+      .text(0, -8, "$ 0", {
+        font: this.uiStyle.font,
+        color: "#ffffff"
+      })
+      .setOrigin(0.5)
+      .setDepth(5);
+
+    this.buyLabelText = scene.add
+      .text(0, 14, "BUY", {
+        font: this.uiStyle.font,
+        color: "#ffffff"
+      })
+      .setOrigin(0.5)
+      .setDepth(5);
+
+    this.buyButton.add([buyBg, this.buyPriceText, this.buyLabelText]);
+    this.buyButton.setSize(buyWidth, buyHeight);
+    this.buyButton.setInteractive({ useHandCursor: true });
+   // this.buyButton.setText("BUY");
+
     const invRows = 3;
     const invCols = 14;
 
@@ -60,26 +128,15 @@ export default class InventoryUI {
 
     this.inventoryItems = [];
 
-    this.inventorySelection = scene.add
-      .rectangle(
-        invLeftScreen + invSlotWidth / 2,
-        invTopScreen + invSlotHeight / 2,
-        invSlotWidth - 6,
-        invSlotHeight - 18
-      )
-      .setOrigin(0.5)
-      .setStrokeStyle(4, 0xffffff)
-      .setFillStyle(0x000000, 0)
-      .setDepth(5)
-      .setVisible(false);
-
-    this.selectedInventoryRow = 0;
-    this.selectedInventoryCol = 0;
 
     const self = this;
 
-    this.createIcon = function (row, col, textureKey, count) {
-      const x = self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
+    this.createIcon = function (row, col, item) {
+      const textureKey = item.type;
+      const count = item.count;
+
+      const x =
+        self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
       const y =
         self.invTopScreen +
         self.invSlotHeight / 2 +
@@ -99,62 +156,58 @@ export default class InventoryUI {
         .setVisible(false)
         .setInteractive({ useHandCursor: true });
 
-      // === stack count text (Minecraft-style) ===
       const countText = scene.add
         .text(
-          x + self.invSlotWidth / 2 - 4,   // bottom-right corner
+          x + self.invSlotWidth / 2 - 4,
           y + self.invSlotHeight / 2 - 4,
           String(count),
           {
-            fontFamily: "Arial",           // or your Minecraft font
+            fontFamily: "Minecraft",
             fontSize: "14px",
             color: "#ffffff"
           }
         )
-        .setOrigin(1, 1)                   // bottom-right align
+        .setOrigin(1, 1)
         .setDepth(5)
         .setVisible(false);
 
-      countText.setStroke("#000000", 4);   // black outline like MC
+      countText.setStroke("#000000", 4);
 
       icon.invRow = row;
       icon.invCol = col;
       icon.location = "inventory";
       icon.hotbarIndex = null;
       icon.blockType = textureKey;
-      icon.stackCount = count;             // logic value
-      icon.countText = countText;          // UI text object
 
-      icon.on("pointerdown", function () {
-        self.selectInventorySlot(this.invRow, this.invCol);
-        self.itemSystem.handleInventoryClick(this);
+      icon.dataItem = item;
+      icon.stackCount = item.count;
+      icon.countText = countText;
+
+      icon.on("pointerdown", function (pointer) {
+        if (pointer.leftButtonDown()) {
+          self.itemSystem.handleInventoryLeftClick(this);
+
+          const selected =
+            self.hotbarUI.getSelectedItem && self.hotbarUI.getSelectedItem();
+          const price = selected?.price ?? 0;
+
+          self.updateBuyButtonLabel(price);
+        }
       });
 
       self.inventoryItems.push(icon);
     };
 
-
     hotbarUI.inventoryButton.on("pointerdown", () => {
       const show = !this.inventoryPanel.visible;
       this.setInventoryVisible(show);
+
+      const selectedItem =
+        this.hotbarUI.getSelectedItem && this.hotbarUI.getSelectedItem();
+      const price = selectedItem?.price ?? 0;
+      this.updateBuyButtonLabel(price);
     });
-  }
 
-  selectInventorySlot(row, col) {
-    const r = ((row % this.invRows) + this.invRows) % this.invRows;
-    const c = ((col % this.invCols) + this.invCols) % this.invCols;
-
-    this.selectedInventoryRow = r;
-    this.selectedInventoryCol = c;
-
-    const x =
-      this.invLeftScreen + this.invSlotWidth / 2 + c * this.invSlotWidth;
-    const y =
-      this.invTopScreen +
-      this.invSlotHeight / 2 +
-      r * this.invSlotHeight / 1.2;
-
-    this.inventorySelection.setPosition(x, y);
   }
 
   getCellPosition(row, col) {
@@ -168,49 +221,67 @@ export default class InventoryUI {
   }
 
   setInventoryVisible(show) {
-  this.inventoryPanel.setVisible(show);
+    this.inventoryPanel.setVisible(show);
 
-  for (let i = 0; i < this.inventoryItems.length; i++) {
-    const icon = this.inventoryItems[i];
-    if (icon.location === "inventory") {
-      icon.setVisible(show);
-      if (icon.countText) icon.countText.setVisible(show);
+    for (let i = 0; i < this.inventoryItems.length; i++) {
+      const icon = this.inventoryItems[i];
+      if (icon.location === "inventory") {
+        icon.setVisible(show);
+        if (icon.countText) icon.countText.setVisible(show);
+      }
     }
-  }
 
-  this.inventorySelection.setVisible(show);
+    if (this.hotbarUI.setInventoryButtonActive) {
+      this.hotbarUI.setInventoryButtonActive(show);
+    }
 
-  if (show && this.inventoryItems.length > 0) {
-    this.selectInventorySlot(
-      this.inventoryItems[0].invRow,
-      this.inventoryItems[0].invCol
-    );
+    this.buyButton.setVisible(show);
   }
-}
 
 
   setItems(items) {
-  // clear old icons + text
-  for (let i = 0; i < this.inventoryItems.length; i++) {
-    const icon = this.inventoryItems[i];
-    if (icon.countText) icon.countText.destroy();
-    icon.destroy();
+    for (let i = 0; i < this.inventoryItems.length; i++) {
+      const icon = this.inventoryItems[i];
+      if (icon.countText) icon.countText.destroy();
+      icon.destroy();
+    }
+    this.inventoryItems = [];
+
+    const maxSlots = this.invRows * this.invCols;
+    const count = Math.min(items.length, maxSlots);
+
+    for (let i = 0; i < count; i++) {
+      const item = items[i];
+      const row = Math.floor(i / this.invCols);
+      const col = i % this.invCols;
+      this.createIcon(row, col, item);
+    }
   }
-  this.inventoryItems = [];
 
-  const maxSlots = this.invRows * this.invCols;
-  const count = Math.min(items.length, maxSlots);
-
-  for (let i = 0; i < count; i++) {
-    const item = items[i];        
-    const row = Math.floor(i / this.invCols);
-    const col = i % this.invCols;
-    this.createIcon(row, col, item.type, item.count);
+  refreshCounts() {
+    for (let i = 0; i < this.inventoryItems.length; i++) {
+      const icon = this.inventoryItems[i];
+      const dataItem = icon.dataItem;
+      if (icon.countText && dataItem) {
+        icon.countText.setText(String(dataItem.count));
+      }
+    }
   }
-}
-
 
   isOpen() {
     return this.inventoryPanel.visible;
+  }
+
+
+  updateBuyButtonLabel(price) {
+    if (!this.buyPriceText || !this.buyLabelText) return;
+
+    if (!price || price <= 0) {
+      this.buyPriceText.setText("$ 0");
+      this.buyLabelText.setText("BUY");
+    } else {
+      this.buyPriceText.setText(`$ ${price}`);
+      this.buyLabelText.setText("BUY");
+    }
   }
 }

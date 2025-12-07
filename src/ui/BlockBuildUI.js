@@ -83,13 +83,7 @@ export default class BlockBuildUI {
       this.grid.push(row);
     }
 
-    for (let x = 0; x < this.cols; x++) {
-      for (let y = this.minY; y <= -1; y++) {
-        this.placeBlock(x, y, "bedrock");
-      }
-      this.placeBlock(x, 0, "dirt");
-      this.placeBlock(x, 1, "grass");
-    }
+    this.resetToDefault();
   }
 
   worldToScreen(x, y) {
@@ -115,7 +109,6 @@ export default class BlockBuildUI {
     }
 
     cell.type = type;
-
     if (!type) return;
 
     const screen = this.worldToScreen(x, y);
@@ -150,23 +143,68 @@ export default class BlockBuildUI {
         }
       }
     }
-    if (!visible) {
-      this.hoverHighlight.setVisible(false);
-    }
+    if (!visible) this.hoverHighlight.setVisible(false);
   }
 
   removeBlock(x, y) {
-    const cell = this.getCell(x, y);    
+    const cell = this.getCell(x, y);
     if (!cell) return false;
     if (!cell.type || cell.type === "bedrock") return false;
 
     if (cell.sprite) {
-      cell.sprite.destroy();           
-      cell.sprite = null;              
+      cell.sprite.destroy();
+      cell.sprite = null;
     }
 
-    cell.type = null;                   
-
+    cell.type = null;
     return true;
+  }
+
+  resetToDefault() {
+    for (let y = this.minY; y <= this.maxY; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        const cell = this.getCell(x, y);
+        if (cell && cell.sprite) {
+          cell.sprite.destroy();
+          cell.sprite = null;
+        }
+        if (cell) cell.type = null;
+      }
+    }
+
+    for (let x = 0; x < this.cols; x++) {
+      for (let y = this.minY; y <= -1; y++) {
+        this.placeBlock(x, y, "bedrock");
+      }
+      this.placeBlock(x, 0, "dirt");
+      this.placeBlock(x, 1, "grass");
+    }
+  }
+
+  getMapData() {
+    const data = {};
+    for (let y = this.minY; y <= this.maxY; y++) {
+      const row = [];
+      for (let x = 0; x < this.cols; x++) {
+        const cell = this.getCell(x, y);
+        row.push(cell && cell.type ? cell.type : null);
+      }
+      data[y] = row;
+    }
+    return data;
+  }
+
+  loadMapData(mapData) {
+    if (!mapData || typeof mapData !== "object") return;
+
+    for (let y = this.minY; y <= this.maxY; y++) {
+      const row = mapData[y];
+      if (!Array.isArray(row)) continue;
+
+      for (let x = 0; x < this.cols; x++) {
+        const type = row[x] || null;
+        this.placeBlock(x, y, type);
+      }
+    }
   }
 }
