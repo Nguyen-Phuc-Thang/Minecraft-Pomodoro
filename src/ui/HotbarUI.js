@@ -176,11 +176,12 @@ export default class HotbarUI {
 
     this.inventoryLabel = scene.add
       .text(0, 0, "INVENTORY", {
-        font: '16px "Minecraft"',
+        fontFamily: 'Minecraft',
+        fontSize: '16px',
         color: "#ffffff"
       })
       .setOrigin(0.5);
-
+    
     this.inventoryButton.add([invBg, this.inventoryLabel]);
     this.inventoryButton.setSize(this.inventoryBtnWidth, this.inventoryBtnHeight);
     this.inventoryButton.setInteractive({ useHandCursor: true });
