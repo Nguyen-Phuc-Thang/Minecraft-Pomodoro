@@ -144,7 +144,12 @@ export default class BuildScene extends Phaser.Scene {
       this.input.mouse.disableContextMenu();
     }
 
-  
+    const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive();
+    switchButton.on('pointerdown', () => {
+        console.log("Switching to Pomodoro Scene");
+        this.scene.start("PomodoroScene");
+    });
+
     this.loadInventoryFromDB();
 
       this.itemSystem = new ItemSystem(this);
@@ -253,7 +258,7 @@ export default class BuildScene extends Phaser.Scene {
     const width = 200;
     const height = 40;
 
-    this.mapHeaderContainer = this.add.container(padding, padding).setDepth(1001);
+    this.mapHeaderContainer = this.add.container(padding + 800, padding).setDepth(1001);
 
     this.mapDropdownBg = this.add.graphics();
     this.drawDropdownHeader(false);
@@ -276,7 +281,7 @@ export default class BuildScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     this.mapHeaderContainer.add(hitZone);
 
-    this.mapOptionsContainer = this.add.container(padding, padding + height + 5)
+    this.mapOptionsContainer = this.add.container(padding + 800, padding + height + 5)
       .setDepth(1000)
       .setVisible(false)
       .setAlpha(0);
@@ -485,5 +490,7 @@ export default class BuildScene extends Phaser.Scene {
         currentMap: name
         });
     });
+
+
   }
 }
