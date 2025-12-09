@@ -100,7 +100,8 @@ export default class LoginScene extends Phaser.Scene {
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    console.log(error);
+                    console.log(errorCode);
+                    console.log(errorMessage);
                     console.log("Login failed");
                     this.scene.start("PomodoroScene");
                 });            

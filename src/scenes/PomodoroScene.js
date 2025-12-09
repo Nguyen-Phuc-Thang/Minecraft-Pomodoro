@@ -3,7 +3,7 @@ import {
     doc,
     getDoc,
     updateDoc
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+} from "firebase/firestore";
 
 import Phaser from "phaser";
 
@@ -264,7 +264,7 @@ export default class PomodoroScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        if (this.isFocusTime) { // Focus time
+        if (this.isFocusTime) {
             this.setTextVisibility(this.focusTimeTextImages, true);
             this.setTextVisibility(this.breakTimeTextImages, false);
             this.background.fillColor = Phaser.Display.Color.HexStringToColor(this.hotBackgroundColor).color;

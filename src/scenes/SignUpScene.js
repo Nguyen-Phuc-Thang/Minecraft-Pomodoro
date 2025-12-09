@@ -5,7 +5,7 @@ import {
     onSnapshot,
     updateDoc,
     setDoc
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+} from "firebase/firestore";
 
 import Phaser from "phaser";
 import { auth } from "../firebase/firebaseConfig";
