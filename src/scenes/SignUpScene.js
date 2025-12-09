@@ -10,6 +10,22 @@ import {
 import Phaser from "phaser";
 import { auth } from "../firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+
+const BLOCK_CATALOG = [
+    { type: "stone", price: 5 },
+    { type: "grass", price: 1 },
+    { type: "dirt", price: 1 },
+    { type: "sand", price: 2 },
+    { type: "oak_planks", price: 3 },
+    { type: "oak_wood", price: 4 },
+    { type: "bedrock", price: 100 },
+    { type: "obsidian", price: 50 },
+    { type: "bricks", price: 10 },
+    { type: "TNT", price: 20 }
+
+];
+
+
 export default class SignUpScene extends Phaser.Scene {
     constructor() {
         super("SignUpScene");
@@ -108,14 +124,15 @@ export default class SignUpScene extends Phaser.Scene {
 
     async createUserData(uid, email) {
         console.log("Creating user data for:", uid);
+        const initialInventory = BLOCK_CATALOG.map(block => ({ type: block.type, count: 0 }));
 
         await setDoc(doc(db, "users", uid), {
-        email,
-        money: 0,
-        inventory: [],
-        maps: {
-            default: []
-        }
+            email,
+            money: 0,
+            inventory: initialInventory,
+            maps: {
+                default: []
+            }
         });
 
         console.log("User data created for:", uid);
