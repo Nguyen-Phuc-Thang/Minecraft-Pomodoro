@@ -228,7 +228,7 @@ export default class BuildScene extends Phaser.Scene {
 
     const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive();
     switchButton.on('pointerdown', () => {
-        this.scene.start("PomodoroScene", { userId: this.userId });
+        this.scene.switch("PomodoroScene", { userId: this.userId });
     });
   }
 
