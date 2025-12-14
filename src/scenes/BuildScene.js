@@ -137,6 +137,13 @@ export default class BuildScene extends Phaser.Scene {
       textColor: "#f5f5f5",
       mutedTextColor: "#d0d0d0",
       successColor: 0x00aa00,
+      baseColor: 0x707070,
+      accentColor: 0x4f4f4f,
+      hoverColor: 0x8b8b8b,
+      selectedColor: 0x006400,
+      textColor: "#f5f5f5",
+      mutedTextColor: "#d0d0d0",
+      successColor: 0x00aa00,
       font: "16px Minecraft",
       cornerRadius: 4
     };
@@ -227,9 +234,22 @@ export default class BuildScene extends Phaser.Scene {
         console.error(err);
       }
     });
+    const createButton = (x, y, key, keyPressed, action) => {
+      const button = this.add.sprite(x, y, key).setOrigin(0.5).setScale(3).setInteractive();
+      button.on('pointerdown', () => {
+        button.setTexture(keyPressed);
+        action();
+      });
+      button.on('pointerup', () => {
+        button.setTexture(key);
+      });
+      return button;
+    }
 
+    const settingButton = createButton(screen.width - 75, 35, "buildmode_button_setting", "buildmode_button_setting_pressed", () => { });
     const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive();
     switchButton.on('pointerdown', () => {
+      this.scene.start("PomodoroScene", { userId: this.userId });
       this.scene.switch("PomodoroScene", { userId: this.userId });
     });
   }
