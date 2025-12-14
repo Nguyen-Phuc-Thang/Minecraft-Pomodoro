@@ -90,14 +90,16 @@ export default class PomodoroScene extends Phaser.Scene {
 
         // Numbers
         const distanceFromFirstQuartile = [-175, -75, 75, 175];
-        const preloadTime = ["num_2", "num_5", "num_0", "num_0"];
+        const preloadTime = ["num_0", "num_0", "num_1", "num_1"];
+
+
         this.timerDigits = [];
         this.focusDigits = [];
         this.breakDigits = [];
         for (let i = 0; i < 4; i++) {
             this.timerDigits.push(this.add.image(numberFrames[i].x, numberFrames[i].y, preloadTime[i]).setOrigin(0.5));
-            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
-            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
+            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_5" : "num_0")).setOrigin(0.5).setScale(0.75));
+            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_1" : "num_0")).setOrigin(0.5).setScale(0.75));
         }
 
         this.focusColon = this.add.image(WIDTH / 5, HEIGHT - 125, "colon").setOrigin(0.5).setScale(0.75);
@@ -241,10 +243,11 @@ export default class PomodoroScene extends Phaser.Scene {
         // Start countdown
         this.remainingFocusSeconds = this.getRemainingSeconds(this.timerDigits) + 1;
         this.remainingBreakSeconds = 0;
-        this.focusInterval = 0;
+        this.focusInterval = 10;
         this.breakInterval = 0;
         this.isFocusTime = true;
-        this.startButton = createButton(WIDTH / 2, HEIGHT - 125, "startButton", "startButtonPressed", () => {
+
+        const startButtonAction = () => {
             for (let i = 0; i < 4; i++) this.timerDigits[i].setTexture(this.focusDigits[i].texture.key);
             this.focusInterval = this.getRemainingSeconds(this.focusDigits) + 1;
             this.breakInterval = this.getRemainingSeconds(this.breakDigits) + 1;
@@ -252,6 +255,12 @@ export default class PomodoroScene extends Phaser.Scene {
             this.remainingBreakSeconds = this.breakInterval;
             this.rewardCheckpoint = this.remainingFocusSeconds;
             this.isFocusTime = true;
+        }
+
+        startButtonAction(); // Initialize timer display
+
+        this.startButton = createButton(WIDTH / 2, HEIGHT - 125, "startButton", "startButtonPressed", () => {
+            startButtonAction();
         })
 
         //Switch mode 
