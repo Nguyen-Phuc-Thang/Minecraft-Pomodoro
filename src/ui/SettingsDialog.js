@@ -39,6 +39,9 @@ export default class SettingsDialog {
   }
 
   show() {
+    console.log(audioSettings);
+     this.dom.getChildByID('music-volume').value = audioSettings.musicVolume * 100;
+    this.dom.getChildByID('sound-volume').value = audioSettings.sfxVolume * 100;
     this.dom.setVisible(true);
   }
 
@@ -48,7 +51,11 @@ export default class SettingsDialog {
 
   toggle() {
     console.log("Toggling settings dialog visibility");
-    this.dom.setVisible(!this.dom.visible);
+    if (this.dom.visible) {
+      this.hide();
+    } else {
+      this.show();
+    }
   }
 
   destroy() {

@@ -1,4 +1,9 @@
+import { audioSettings } from "../gameSettings.js";
+import Phaser from "phaser";
+
 export default class InventoryUI {
+  preload() {
+  }
   constructor(scene, itemSystem, hotbarUI) {
     this.scene = scene;
     this.itemSystem = itemSystem;
@@ -83,6 +88,7 @@ export default class InventoryUI {
 
     this.buyButton.on("pointerdown", () => {
       this._redrawBuyButton("pressed");
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.buyButton.on("pointerup", () => {
