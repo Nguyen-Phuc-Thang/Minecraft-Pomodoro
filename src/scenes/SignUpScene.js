@@ -101,13 +101,13 @@ export default class SignUpScene extends Phaser.Scene {
 
         // Add events to buttons
         const signupButton = signupForm.getChildByID('signupButton');
-        signupButton.addEventListener('click', async () => {
+        signupButton.addEventListener('click', () => {
             const emailInput = signupForm.getChildByID('email');
             const passwordInput = signupForm.getChildByID('password');
             const email = emailInput.value;
             const password = passwordInput.value;
 
-            await createUserWithEmailAndPassword(auth, email, password)
+            createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     this.createUserData(user.uid, user.email);
