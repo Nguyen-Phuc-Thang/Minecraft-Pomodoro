@@ -6,6 +6,8 @@ import {
 } from "firebase/firestore";
 
 import Phaser from "phaser";
+import SettingsDialog from "../ui/SettingsDialog.js";
+import { audioSettings } from "../gameSettings.js";
 
 export default class PomodoroScene extends Phaser.Scene {
     constructor() {
@@ -65,6 +67,11 @@ export default class PomodoroScene extends Phaser.Scene {
         this.load.image("coinFrame", "assets/ui/coin_frame.png");
         this.load.image("pomodoroMode", "assets/ui/pomodoro_mode.png");
         this.load.image("buildMode", "assets/ui/build_mode.png");
+
+        this.load.audio("woodenButtonClick", "assets/sounds/sfx/wooden_button_click.mp3");
+        this.load.audio("clockTick", "assets/sounds/sfx/clock_tick.mp3");
+    
+        this.load.html('settings-html', 'src/ui/settings.html');
     }
 
     create() {
@@ -90,7 +97,7 @@ export default class PomodoroScene extends Phaser.Scene {
 
         // Numbers
         const distanceFromFirstQuartile = [-175, -75, 75, 175];
-        const preloadTime = ["num_2", "num_5", "num_0", "num_0"];
+        const preloadTime = ["num_0", "num_0", "num_0", "num_0"];
         this.timerDigits = [];
         this.focusDigits = [];
         this.breakDigits = [];
@@ -108,6 +115,7 @@ export default class PomodoroScene extends Phaser.Scene {
             const button = this.add.sprite(x, y, key).setOrigin(0.5).setScale(1.5).setInteractive();
             button.on('pointerdown', () => {
                 button.setTexture(keyPressed);
+                this.sound.play("woodenButtonClick", { volume: audioSettings.sfxVolume });
                 action();
             });
             button.on('pointerup', () => {
@@ -164,6 +172,7 @@ export default class PomodoroScene extends Phaser.Scene {
 
         this.focusTimeTextImages = createText("Focus Time", WIDTH / 2 - 175, HEIGHT / 2 - 220, 0.5, 30, 60);
         this.breakTimeTextImages = createText("Break Time", WIDTH / 2 - 175, HEIGHT / 2 - 220, 0.5, 30, 60);
+        this.setTextVisibility(this.breakTimeTextImages, false);
 
         const pomodoroTextImages = createText("Pomodoro", WIDTH / 2 - 275, 35, 0.4, 26, 48);
         const buildTextImages = createText("Build", WIDTH / 2 + 100, 35, 0.4, 26, 48);
@@ -237,8 +246,16 @@ export default class PomodoroScene extends Phaser.Scene {
             fontWeight: 'bold'
         }).setOrigin(0, 0.5);
 
+        this.settingsDialog = new SettingsDialog(this, WIDTH / 2, HEIGHT / 2);        
+
+        settingButton.on('pointerdown', () => {
+            console.log("Toggling settings dialog");
+            this.settingsDialog.toggle();
+        });
+
 
         // Start countdown
+        this.timerStarted = false;
         this.remainingFocusSeconds = this.getRemainingSeconds(this.timerDigits) + 1;
         this.remainingBreakSeconds = 0;
         this.focusInterval = 0;
@@ -251,30 +268,39 @@ export default class PomodoroScene extends Phaser.Scene {
             this.remainingFocusSeconds = this.focusInterval;
             this.remainingBreakSeconds = this.breakInterval;
             this.rewardCheckpoint = this.remainingFocusSeconds;
+            this.accumulatedRewardSeconds = 0;
             this.isFocusTime = true;
+            this.timerStarted = true;
         })
 
         //Switch mode 
         const switchButton = this.add.sprite(WIDTH / 2, 35, "pomodoroMode").setOrigin(0.5).setScale(3).setInteractive();
         switchButton.on('pointerdown', () => {
             this.scene.start("PreloadScene", { userId: this.userId });
+            console.log(audioSettings.sfxVolume);
+            this.sound.play("woodenButtonClick", { volume: audioSettings.sfxVolume });
         });
 
         this.loadUserData();
     }
 
     update(time, delta) {
+        if (!this.timerStarted) return;
         if (this.isFocusTime) {
             this.setTextVisibility(this.focusTimeTextImages, true);
             this.setTextVisibility(this.breakTimeTextImages, false);
             this.background.fillColor = Phaser.Display.Color.HexStringToColor(this.hotBackgroundColor).color;
             if (this.remainingFocusSeconds > 0) {
                 this.remainingFocusSeconds -= delta / 1000;
-                if (this.rewardCheckpoint - this.remainingFocusSeconds >= 10) {
-                    console.log("Rewarding user 1 coin");
-                    this.rewardCheckpoint -= 10;
+                this.accumulatedRewardSeconds += delta / 1000;
+                if (this.accumulatedRewardSeconds >= 10) {
+                    this.accumulatedRewardSeconds = 0;
                     this.rewardUserRealtime();
                 }
+                // if (this.rewardCheckpoint - this.remainingFocusSeconds >= 10) {
+                //     console.log("Rewarding user 1 coin");
+                //     this.rewardCheckpoint -= 10;
+                // }
             } else {
                 this.isFocusTime = false;
                 this.remainingBreakSeconds = this.breakInterval;
