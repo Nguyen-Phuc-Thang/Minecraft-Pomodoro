@@ -12,16 +12,73 @@ import { auth } from "../firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const BLOCK_CATALOG = [
-    { type: "stone", price: 5 },
+
+    { type: "steve", price: 1 },
+
     { type: "grass", price: 1 },
     { type: "dirt", price: 1 },
+    { type: "flower", price: 1 },
+
+    { type: "torch", price: 2 },
     { type: "sand", price: 2 },
+
     { type: "oak_planks", price: 3 },
+    { type: "half_wood", price: 3 },
+    { type: "leaves", price: 3 },
+
+    { type: "mushroom", price: 4 },
+    { type: "red_mushroom", price: 4 },
     { type: "oak_wood", price: 4 },
-    { type: "bedrock", price: 100 },
-    { type: "obsidian", price: 50 },
+
+    { type: "stone", price: 5 },
+    { type: "cactus", price: 5 },
+    { type: "stone1", price: 5 },
+
+    { type: "glass", price: 6 },
+    { type: "pink_wool", price: 6 },
+
+    { type: "triangle_wood", price: 7 },
+    { type: "triangle_wood2", price: 7 },
+
+    { type: "ice", price: 8 },
+
+    { type: "pumpkin", price: 9 },
+
+    { type: "wood_trapdoor", price: 10 },
+
     { type: "bricks", price: 10 },
-    { type: "TNT", price: 20 }
+    { type: "lantern", price: 11 },
+
+    { type: "magma", price: 12 },
+
+    { type: "iron_trapdoor", price: 15 },
+    { type: "books", price: 15 },
+
+    { type: "crafting_table", price: 20 },
+    { type: "TNT", price: 20 },
+
+    { type: "cake", price: 25 },
+    { type: "chest", price: 25 },
+
+    { type: "stove", price: 30 },
+
+    { type: "shit", price: 40 },
+    { type: "shit1", price: 40 },
+    { type: "shit3", price: 40 },
+
+    { type: "obsidian", price: 50 },
+
+    { type: "iron_block", price: 80 },
+
+    { type: "bedrock", price: 100 },
+    { type: "gold_block", price: 100 },
+
+    { type: "diamond_block", price: 150 },
+
+    { type: "emerald_block", price: 200 },
+
+    { type: "command_block", price: 500 }
+
 
 ];
 

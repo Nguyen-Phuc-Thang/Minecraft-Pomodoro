@@ -263,6 +263,9 @@ export default class PomodoroScene extends Phaser.Scene {
         this.focusInterval = 10;
         this.breakInterval = 0;
         this.isFocusTime = true;
+        this.startButton = createButton(WIDTH / 2, HEIGHT - 125, "startButton", "startButtonPressed", () => {
+            startButtonAction();
+        });
 
         const startButtonAction = () => {
             for (let i = 0; i < 4; i++) this.timerDigits[i].setTexture(this.focusDigits[i].texture.key);

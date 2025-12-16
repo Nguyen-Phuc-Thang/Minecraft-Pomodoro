@@ -26,6 +26,41 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("bricks", "assets/blocks/bricks.png");
     this.load.image("sand", "assets/blocks/sand.png");
     this.load.image("TNT", "assets/blocks/TNT.png");
+    this.load.image("ice", "assets/blocks/ice.png");
+    this.load.image("command_block", "assets/blocks/command_block.png");
+    this.load.image("glass", "assets/blocks/glass.png");
+    this.load.image("triangle_wood", "assets/blocks/triangle_wood.png");
+    this.load.image("pumpkin", "assets/blocks/pumpkin.png");
+    this.load.image("magma", "assets/blocks/magma.png");
+    this.load.image("lantern", "assets/blocks/lantern.png");
+    this.load.image("mushroom", "assets/blocks/mushroom.png");
+    this.load.image("red_mushroom", "assets/blocks/red__mushroom.png");
+    this.load.image("half_wood", "assets/blocks/half_wood.png");
+    this.load.image("cactus", "assets/blocks/cactus.png");
+    this.load.image("books", "assets/blocks/books.png");
+    this.load.image("emerald_block", "assets/blocks/emerald_block.png");
+    this.load.image("diamond_block", "assets/blocks/diamond_block.png");
+    this.load.image("gold_block", "assets/blocks/gold_block.png");
+    this.load.image("iron_block", "assets/blocks/iron_block.png");
+    this.load.image("chest", "assets/blocks/chest.png");
+    this.load.image("stove", "assets/blocks/stove.png");
+    this.load.image("crafting_table", "assets/blocks/crafting_table.png");
+    this.load.image("steve", "assets/blocks/steve.png");
+    this.load.image("torch", "assets/blocks/torch.png");
+    this.load.image("flower", "assets/blocks/flower.png");
+    this.load.image("triangle_wood2", "assets/blocks/triangle_wood2.png");
+    this.load.image("iron_trapdoor", "assets/blocks/iron_trapdoor.png");
+    this.load.image("wood_trapdoor", "assets/blocks/wood_trapdoor.png");
+    this.load.image("stone1", "assets/blocks/stone1.png");
+    this.load.image("cake", "assets/blocks/cake.png");
+    this.load.image("shit3", "assets/blocks/shit3.png");
+    this.load.image("shit1", "assets/blocks/shit1.png");
+    this.load.image("shit", "assets/blocks/shit.png");
+    this.load.image("leaves", "assets/blocks/leaves.png");
+    this.load.image("pink_wool", "assets/blocks/pink_wool.png");
+
+
+
     this.load.font('Minecraft', 'assets/fonts/Minecraft.ttf');
     this.load.image("pomodoroMode", "assets/ui/pomodoro_mode.png");
     this.load.image("buildMode", "assets/ui/build_mode.png");
