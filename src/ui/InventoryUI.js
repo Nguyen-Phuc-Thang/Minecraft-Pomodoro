@@ -1,9 +1,8 @@
 import { audioSettings } from "../gameSettings.js";
 
-
 export default class InventoryUI {
-  preload() {
-  }
+  preload() { }
+
   constructor(scene, itemSystem, hotbarUI) {
     this.scene = scene;
     this.itemSystem = itemSystem;
@@ -30,11 +29,7 @@ export default class InventoryUI {
     const invGap = 10;
 
     const invX = barX;
-    const invY =
-      barY -
-      (barHeight * barScale) / 2 -
-      (invHeight * invScale) / 2 -
-      invGap;
+    const invY = barY - (barHeight * barScale) / 2 - (invHeight * invScale) / 2 - invGap;
 
     this.invX = invX;
     this.invY = invY;
@@ -47,21 +42,18 @@ export default class InventoryUI {
       .setOrigin(0.5)
       .setScale(invScale)
       .setVisible(false)
-      .setDepth(3);
+      .setDepth(3)
+      .setScrollFactor(0);
 
-    const buyX =
-      this.invX + (this.invWidth * this.invScale) / 2 + 220;
+    const buyX = this.invX + (this.invWidth * this.invScale) / 2 + 220;
     const buyY = this.hotbarUI.barY - this.hotbarUI.slotHeight - 50;
 
     this.buyWidth = 150;
     this.buyHeight = 100;
 
-    this.buyButton = scene.add
-      .container(buyX, buyY)
-      .setDepth(4)
-      .setVisible(false);
+    this.buyButton = scene.add.container(buyX, buyY).setDepth(4).setVisible(false).setScrollFactor(0);
 
-    const buyBg = scene.add.graphics();
+    const buyBg = scene.add.graphics().setScrollFactor(0);
     this.buyBg = buyBg;
 
     this.buyPriceText = scene.add
@@ -70,7 +62,8 @@ export default class InventoryUI {
         color: "#303030"
       })
       .setOrigin(0.5)
-      .setDepth(5);
+      .setDepth(5)
+      .setScrollFactor(0);
 
     this.buyLabelText = scene.add
       .text(0, 14, "BUY", {
@@ -78,7 +71,8 @@ export default class InventoryUI {
         color: "#303030"
       })
       .setOrigin(0.5)
-      .setDepth(5);
+      .setDepth(5)
+      .setScrollFactor(0);
 
     this.buyButton.add([buyBg, this.buyPriceText, this.buyLabelText]);
     this.buyButton.setSize(this.buyWidth, this.buyHeight);
@@ -129,18 +123,11 @@ export default class InventoryUI {
       const textureKey = item.type;
       const count = item.count;
 
-      const x =
-        self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
-      const y =
-        self.invTopScreen +
-        self.invSlotHeight / 2 +
-        row * self.invSlotHeight / 1.2;
+      const x = self.invLeftScreen + self.invSlotWidth / 2 + col * self.invSlotWidth;
+      const y = self.invTopScreen + self.invSlotHeight / 2 + row * self.invSlotHeight / 1.2;
 
       const source = scene.textures.get(textureKey).getSourceImage();
-      const scale = Math.min(
-        (self.invSlotWidth * 0.8) / source.width,
-        (self.invSlotHeight * 0.8) / source.height
-      );
+      const scale = Math.min((self.invSlotWidth * 0.8) / source.width, (self.invSlotHeight * 0.8) / source.height);
 
       const icon = scene.add
         .image(x, y, textureKey)
@@ -148,22 +135,19 @@ export default class InventoryUI {
         .setScale(scale)
         .setDepth(4)
         .setVisible(false)
-        .setInteractive({ useHandCursor: true });
+        .setInteractive({ useHandCursor: true })
+        .setScrollFactor(0);
 
       const countText = scene.add
-        .text(
-          x + self.invSlotWidth / 2 - 4,
-          y + self.invSlotHeight / 2 - 4,
-          String(count),
-          {
-            fontFamily: "Minecraft",
-            fontSize: "14px",
-            color: "#ffffff"
-          }
-        )
+        .text(x + self.invSlotWidth / 2 - 4, y + self.invSlotHeight / 2 - 4, String(count), {
+          fontFamily: "Minecraft",
+          fontSize: "14px",
+          color: "#ffffff"
+        })
         .setOrigin(1, 1)
         .setDepth(5)
-        .setVisible(false);
+        .setVisible(false)
+        .setScrollFactor(0);
 
       countText.setStroke("#000000", 4);
 
@@ -181,8 +165,7 @@ export default class InventoryUI {
         if (pointer.leftButtonDown()) {
           self.itemSystem.handleInventoryLeftClick(this);
 
-          const selected =
-            self.hotbarUI.getSelectedItem && self.hotbarUI.getSelectedItem();
+          const selected = self.hotbarUI.getSelectedItem && self.hotbarUI.getSelectedItem();
           const price = selected?.price ?? 0;
           self.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
           self.updateBuyButtonLabel(price);
@@ -196,8 +179,7 @@ export default class InventoryUI {
       const show = !this.inventoryPanel.visible;
       this.setInventoryVisible(show);
 
-      const selectedItem =
-        this.hotbarUI.getSelectedItem && this.hotbarUI.getSelectedItem();
+      const selectedItem = this.hotbarUI.getSelectedItem && this.hotbarUI.getSelectedItem();
       const price = selectedItem?.price ?? 0;
       this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.updateBuyButtonLabel(price);
@@ -205,12 +187,8 @@ export default class InventoryUI {
   }
 
   getCellPosition(row, col) {
-    const x =
-      this.invLeftScreen + this.invSlotWidth / 2 + col * this.invSlotWidth;
-    const y =
-      this.invTopScreen +
-      this.invSlotHeight / 2 +
-      row * this.invSlotHeight / 1.2;
+    const x = this.invLeftScreen + this.invSlotWidth / 2 + col * this.invSlotWidth;
+    const y = this.invTopScreen + this.invSlotHeight / 2 + row * this.invSlotHeight / 1.2;
     return { x, y };
   }
 

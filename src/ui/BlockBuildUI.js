@@ -3,103 +3,94 @@ import { audioSettings } from "../gameSettings.js";
 export default class BlockBuildUI {
   constructor(scene, hotbarUI) {
     this.scene = scene;
+    this.hotbarUI = hotbarUI;
 
-    const width = scene.scale.width - 5;
-    const barHeight = hotbarUI.barHeight;
-    const barScale = hotbarUI.barScale;
-    const barY = hotbarUI.barY;
+    this.mapCols = 50;
+    this.mapRows = 25;
 
-    this.cols = 25;
-    this.minY = -3;
-    this.maxY = 8;
-    this.rows = this.maxY - this.minY + 1;
+    this.viewCols = 25;
+    this.topOffset = 90;
 
-    const cellWidth = width / this.cols;
-    const cellHeight = cellWidth;
+    const usableWidth = scene.scale.width - 5;
+    this.cellSize = usableWidth / this.viewCols;
 
-    this.cellWidth = cellWidth;
-    this.cellHeight = cellHeight;
+    this.worldWidth = this.mapCols * this.cellSize;
+    this.worldHeight = this.topOffset + this.mapRows * this.cellSize;
 
-    const baseY = barY - (barHeight * barScale) / 2 - cellHeight / 2;
-    this.baseY = baseY;
-
-    this.grid = [];
+    this.grid = new Array(this.mapRows);
+    for (let y = 0; y < this.mapRows; y++) {
+      this.grid[y] = new Array(this.mapCols);
+    }
 
     this.hoverHighlight = scene.add
-      .rectangle(0, 0, cellWidth - 4, cellHeight - 4)
+      .rectangle(0, 0, this.cellSize - 4, this.cellSize - 4)
       .setOrigin(0.5)
       .setStrokeStyle(3, 0xffffff)
       .setFillStyle(0x000000, 0)
-      .setDepth(3)
+      .setDepth(0)
       .setVisible(false);
 
-    for (let y = this.minY; y <= this.maxY; y++) {
-      const row = [];
-      for (let x = 0; x < this.cols; x++) {
-        const screen = this.worldToScreen(x, y);
+    for (let y = 0; y < this.mapRows; y++) {
+      for (let x = 0; x < this.mapCols; x++) {
+        const p = this.cellToWorld(x, y);
 
-        let zone = null;
-        if (y >= 0) {
-          zone = scene.add
-            .zone(screen.x, screen.y, cellWidth, cellHeight)
-            .setOrigin(0.5)
-            .setInteractive({ useHandCursor: true });
+        const zone = scene.add
+          .zone(p.x, p.y, this.cellSize, this.cellSize)
+          .setOrigin(0.5)
+          .setInteractive({ useHandCursor: true });
 
-          zone.gridX = x;
-          zone.gridY = y;
+        zone.gridX = x;
+        zone.gridY = y;
 
-          zone.on("pointerover", () => {
-            const cell = this.getCell(zone.gridX, zone.gridY);
-            if (!cell || cell.type === "bedrock") return;
-            this.hoverHighlight.setPosition(zone.x, zone.y);
-            this.hoverHighlight.setVisible(true);
-          });
+        zone.on("pointerover", () => {
+          const cell = this.getCell(zone.gridX, zone.gridY);
+          if (!cell || cell.type === "bedrock") return;
+          this.hoverHighlight.setPosition(zone.x, zone.y);
+          this.hoverHighlight.setVisible(true);
+        });
 
-          zone.on("pointerout", () => {
-            this.hoverHighlight.setVisible(false);
-          });
+        zone.on("pointerout", () => {
+          this.hoverHighlight.setVisible(false);
+        });
 
-          zone.on("pointerdown", () => {
-            const cell = this.getCell(zone.gridX, zone.gridY);
-            if (!cell || cell.type === "bedrock") return;
-            this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
-            if (this.onCellClick) {
-              this.onCellClick({
-                x: zone.gridX,
-                y: zone.gridY,
-                type: cell.type,
-                sprite: cell.sprite,
-                zone
-              });
-            }
-          });
-        }
+        zone.on("pointerdown", () => {
+          const cell = this.getCell(zone.gridX, zone.gridY);
+          if (!cell || cell.type === "bedrock") return;
+          this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
+          if (this.onCellClick) {
+            this.onCellClick({
+              x: zone.gridX,
+              y: zone.gridY,
+              type: cell.type,
+              sprite: cell.sprite,
+              zone
+            });
+          }
+        });
 
-        row.push({
+        this.grid[y][x] = {
           x,
           y,
           type: null,
           sprite: null,
           zone
-        });
+        };
       }
-      this.grid.push(row);
     }
 
     this.resetToDefault();
   }
 
-  worldToScreen(x, y) {
-    const sx = this.cellWidth / 2 + x * this.cellWidth;
-    const sy = this.baseY - y * this.cellHeight;
-    return { x: sx, y: sy };
+  cellToWorld(x, y) {
+    const wx = this.cellSize / 2 + x * this.cellSize;
+    const wy = this.topOffset + (this.mapRows - 1 - y) * this.cellSize + this.cellSize / 2;
+    return { x: wx, y: wy };
   }
 
   getCell(x, y) {
-    if (x < 0 || x >= this.cols) return null;
-    if (y < this.minY || y > this.maxY) return null;
-    const rowIndex = y - this.minY;
-    return this.grid[rowIndex][x];
+    if (x < 0 || x >= this.mapCols) return null;
+    if (y < 0 || y >= this.mapRows) return null;
+    return this.grid[y][x];
   }
 
   placeBlock(x, y, type) {
@@ -114,16 +105,13 @@ export default class BlockBuildUI {
     cell.type = type;
     if (!type) return;
 
-    const screen = this.worldToScreen(x, y);
+    const p = this.cellToWorld(x, y);
     const source = this.scene.textures.get(type).getSourceImage();
-    const scale = Math.min(
-      this.cellWidth / source.width,
-      this.cellHeight / source.height
-    );
-    const depth = type === "bedrock" ? 0 : 2;
+    const scale = Math.min(this.cellSize / source.width, this.cellSize / source.height);
+    const depth = 0;
 
     cell.sprite = this.scene.add
-      .image(screen.x, screen.y, type)
+      .image(p.x, p.y, type)
       .setOrigin(0.5)
       .setScale(scale)
       .setDepth(depth);
@@ -136,9 +124,9 @@ export default class BlockBuildUI {
   }
 
   setVisible(visible) {
-    for (let r = 0; r < this.grid.length; r++) {
-      for (let c = 0; c < this.grid[r].length; c++) {
-        const cell = this.grid[r][c];
+    for (let y = 0; y < this.mapRows; y++) {
+      for (let x = 0; x < this.mapCols; x++) {
+        const cell = this.grid[y][x];
         if (cell.sprite) cell.sprite.setVisible(visible);
         if (cell.zone) {
           if (visible) cell.zone.setInteractive();
@@ -164,8 +152,8 @@ export default class BlockBuildUI {
   }
 
   resetToDefault() {
-    for (let y = this.minY; y <= this.maxY; y++) {
-      for (let x = 0; x < this.cols; x++) {
+    for (let y = 0; y < this.mapRows; y++) {
+      for (let x = 0; x < this.mapCols; x++) {
         const cell = this.getCell(x, y);
         if (cell && cell.sprite) {
           cell.sprite.destroy();
@@ -175,22 +163,22 @@ export default class BlockBuildUI {
       }
     }
 
-    for (let x = 0; x < this.cols; x++) {
-      for (let y = this.minY; y <= -1; y++) {
-        this.placeBlock(x, y, "bedrock");
-      }
-      this.placeBlock(x, 0, "dirt");
-      this.placeBlock(x, 1, "grass");
+    for (let x = 0; x < this.mapCols; x++) {
+      this.placeBlock(x, 0, "bedrock");
+      this.placeBlock(x, 1, "bedrock");
+      this.placeBlock(x, 2, "bedrock");
+      this.placeBlock(x, 3, "dirt");
+      this.placeBlock(x, 4, "grass");
     }
   }
 
   getMapData() {
     const data = {};
-    for (let y = this.minY; y <= this.maxY; y++) {
-      const row = [];
-      for (let x = 0; x < this.cols; x++) {
+    for (let y = 0; y < this.mapRows; y++) {
+      const row = new Array(this.mapCols);
+      for (let x = 0; x < this.mapCols; x++) {
         const cell = this.getCell(x, y);
-        row.push(cell && cell.type ? cell.type : null);
+        row[x] = cell && cell.type ? cell.type : null;
       }
       data[y] = row;
     }
@@ -200,11 +188,11 @@ export default class BlockBuildUI {
   loadMapData(mapData) {
     if (!mapData || typeof mapData !== "object") return;
 
-    for (let y = this.minY; y <= this.maxY; y++) {
+    for (let y = 0; y < this.mapRows; y++) {
       const row = mapData[y];
       if (!Array.isArray(row)) continue;
 
-      for (let x = 0; x < this.cols; x++) {
+      for (let x = 0; x < this.mapCols; x++) {
         const type = row[x] || null;
         this.placeBlock(x, y, type);
       }

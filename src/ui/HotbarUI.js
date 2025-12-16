@@ -1,9 +1,7 @@
 import { audioSettings } from "../gameSettings.js";
 
 export default class HotbarUI {
-
-  preload() {
-  }
+  preload() { }
 
   constructor(scene, itemSystem) {
     this.scene = scene;
@@ -29,7 +27,8 @@ export default class HotbarUI {
       .image(barX, barY, "slot_bar")
       .setOrigin(0.5)
       .setScale(barScale)
-      .setDepth(1);
+      .setDepth(1)
+      .setScrollFactor(0);
 
     const numSlots = 14;
     this.numSlots = numSlots;
@@ -50,16 +49,12 @@ export default class HotbarUI {
     this.selectedSlotIndex = 0;
 
     this.slotSelection = scene.add
-      .rectangle(
-        firstSlotX,
-        barY,
-        slotWidth - 7,
-        slotHeight - 50
-      )
+      .rectangle(firstSlotX, barY, slotWidth - 7, slotHeight - 50)
       .setOrigin(0.5)
       .setStrokeStyle(4, 0xffffff)
       .setFillStyle(0x000000, 0)
-      .setDepth(5);
+      .setDepth(5)
+      .setScrollFactor(0);
 
     for (let i = 0; i < numSlots; i++) {
       const x = firstSlotX + i * slotWidth;
@@ -67,6 +62,8 @@ export default class HotbarUI {
         .zone(x, barY, slotWidth, slotHeight)
         .setOrigin(0.5)
         .setInteractive();
+
+      zone.setScrollFactor(0);
 
       zone.slotIndex = i;
       zone.on("pointerdown", (pointer) => {
@@ -96,15 +93,7 @@ export default class HotbarUI {
       }
     });
 
-    const btnSize = 636;
-    const btnScale = 0.16;
-    const btnWidth = btnSize * btnScale;
     const gap = 10;
-
-    const totalBtnWidth = btnWidth * 3 + gap * 2;
-    const rightMargin = 20;
-    const firstBtnX = width - rightMargin - totalBtnWidth + btnWidth / 2 - 20;
-    const btnY = barY;
 
     this.modeBtnWidth = 120;
     this.modeBtnHeight = 40;
@@ -117,11 +106,15 @@ export default class HotbarUI {
     this.isBuildMode = true;
     this.currentTool = "build";
 
-    this.buildModeButton = scene.add
-      .container(firstBtnX, btnY)
-      .setDepth(2);
+    const btnWidth = 120;
+    const totalBtnWidth = btnWidth * 3 + gap * 2;
+    const rightMargin = 20;
+    const firstBtnX = width - rightMargin - totalBtnWidth + btnWidth / 2 - 20;
+    const btnY = barY;
 
-    const buildBg = scene.add.graphics();
+    this.buildModeButton = scene.add.container(firstBtnX, btnY).setDepth(2).setScrollFactor(0);
+
+    const buildBg = scene.add.graphics().setScrollFactor(0);
     this.buildModeBg = buildBg;
 
     this.buildModeLabel = scene.add
@@ -129,7 +122,8 @@ export default class HotbarUI {
         font: '16px "Minecraft"',
         color: "#303030"
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScrollFactor(0);
 
     this.buildModeButton.add([buildBg, this.buildModeLabel]);
     this.buildModeButton.setSize(this.modeBtnWidth, this.modeBtnHeight);
@@ -158,11 +152,9 @@ export default class HotbarUI {
 
     const inventoryBtnX = firstBtnX + this.inventoryBtnWidth + gap + 40;
 
-    this.inventoryButton = scene.add
-      .container(inventoryBtnX, btnY)
-      .setDepth(2);
+    this.inventoryButton = scene.add.container(inventoryBtnX, btnY).setDepth(2).setScrollFactor(0);
 
-    const invBg = scene.add.graphics();
+    const invBg = scene.add.graphics().setScrollFactor(0);
     this.inventoryBg = invBg;
 
     this.inventoryLabel = scene.add
@@ -170,7 +162,8 @@ export default class HotbarUI {
         font: '16px "Minecraft"',
         color: "#303030"
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScrollFactor(0);
 
     this.inventoryButton.add([invBg, this.inventoryLabel]);
     this.inventoryButton.setSize(this.inventoryBtnWidth, this.inventoryBtnHeight);
@@ -277,10 +270,7 @@ export default class HotbarUI {
 
   getSlotIconPosition(index) {
     const slot = this.hotbarSlots[index];
-    return {
-      x: slot.x,
-      y: this.barY
-    };
+    return { x: slot.x, y: this.barY };
   }
 
   setSlotItem(index, item) {
@@ -313,8 +303,6 @@ export default class HotbarUI {
       const slot = this.hotbarSlots[i];
       let textObj = this.hotbarCountTexts[i];
 
-      console.log("Refreshing hotbar slot", i, "with item:", item);
-
       if (item && item.count > 0) {
         const textX = slot.x + this.slotWidth / 2 - 4;
         const textY = this.barY + this.slotHeight / 2 - 12;
@@ -327,7 +315,8 @@ export default class HotbarUI {
               color: "#ffffff"
             })
             .setOrigin(1, 1)
-            .setDepth(5);
+            .setDepth(5)
+            .setScrollFactor(0);
 
           textObj.setStroke("#000000", 4);
           this.hotbarCountTexts[i] = textObj;
@@ -337,9 +326,7 @@ export default class HotbarUI {
           textObj.setVisible(true);
         }
       } else {
-        console.log("Clearing hotbar slot", i, "text object");
         if (textObj) {
-          textObj.setText(String(""));
           textObj.destroy();
           this.hotbarCountTexts[i] = null;
         }

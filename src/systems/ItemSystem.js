@@ -6,7 +6,6 @@ export default class ItemSystem {
     this.inventoryUI = null;
 
     this.hotbarItemSprites = [];
-
     this.hotbarItems = [];
   }
 
@@ -20,7 +19,6 @@ export default class ItemSystem {
     this.inventoryUI = inventoryUI;
   }
 
-
   unequipHotbarItem(slotIndex) {
     if (!this.hotbarUI) return;
     const sprite = this.hotbarItemSprites[slotIndex];
@@ -30,6 +28,7 @@ export default class ItemSystem {
     }
     this.hotbarItems[slotIndex] = null;
     this.hotbarUI.setSlotItem(slotIndex, null);
+    this.hotbarUI.refreshCounts();
   }
 
   equipFromInventory(icon) {
@@ -37,18 +36,14 @@ export default class ItemSystem {
 
     const type = icon.blockType;
 
-    const existingIndex = this.hotbarItems.findIndex(
-      (item) => item && item.type === type
-    );
+    const existingIndex = this.hotbarItems.findIndex((item) => item && item.type === type);
     if (existingIndex !== -1) {
       this.hotbarUI.selectSlot(existingIndex);
       return;
     }
 
     const emptyIndex = this.hotbarItems.findIndex((item) => item === null);
-    if (emptyIndex === -1) {
-      return;
-    }
+    if (emptyIndex === -1) return;
 
     const pos = this.hotbarUI.getSlotIconPosition(emptyIndex);
     const textureKey = type;
@@ -63,19 +58,15 @@ export default class ItemSystem {
       .image(pos.x, pos.y, textureKey)
       .setOrigin(0.5)
       .setScale(scale)
-      .setDepth(4);
+      .setDepth(4)
+      .setScrollFactor(0);
 
     sprite.blockType = textureKey;
 
     this.hotbarItemSprites[emptyIndex] = sprite;
 
-    const logicalItem = icon.dataItem || {
-      type,
-      count: icon.stackCount
-    };
-
+    const logicalItem = icon.dataItem || { type, count: icon.stackCount };
     this.hotbarItems[emptyIndex] = logicalItem;
-
 
     if (typeof this.hotbarUI.setSlotItem === "function") {
       this.hotbarUI.setSlotItem(emptyIndex, logicalItem);
@@ -85,9 +76,7 @@ export default class ItemSystem {
     this.hotbarUI.refreshCounts();
   }
 
-
   handleInventoryClick(icon) {
-
     this.equipFromInventory(icon);
   }
 
@@ -95,8 +84,7 @@ export default class ItemSystem {
     this.equipFromInventory(icon);
   }
 
-  handleHotbarClick(_slotIndex) {
-  }
+  handleHotbarClick(_slotIndex) { }
 
   getSelectedItem() {
     if (!this.hotbarUI) return null;
