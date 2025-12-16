@@ -29,7 +29,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.font('Minecraft', 'assets/fonts/Minecraft.ttf');
     this.load.image("pomodoroMode", "assets/ui/pomodoro_mode.png");
     this.load.image("buildMode", "assets/ui/build_mode.png");
-
+    this.load.audio("woodenButtonClick", "assets/sounds/sfx/wooden_button_click.mp3");
     this.load.audio("minecraft_button_click", "assets/sounds/sfx/minecraft_button_click.mp3");
   }
 

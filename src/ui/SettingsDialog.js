@@ -40,7 +40,7 @@ export default class SettingsDialog {
 
   show() {
     console.log(audioSettings);
-     this.dom.getChildByID('music-volume').value = audioSettings.musicVolume * 100;
+    this.dom.getChildByID('music-volume').value = audioSettings.musicVolume * 100;
     this.dom.getChildByID('sound-volume').value = audioSettings.sfxVolume * 100;
     this.dom.setVisible(true);
   }

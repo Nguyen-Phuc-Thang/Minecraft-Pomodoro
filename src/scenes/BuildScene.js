@@ -221,6 +221,7 @@ export default class BuildScene extends Phaser.Scene {
       this.inventoryUI.refreshCounts();
       this.hotbarUI.refreshCounts();
 
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       const userRef = doc(db, "users", this.userId);
       try {
         await updateDoc(userRef, {
@@ -252,6 +253,7 @@ export default class BuildScene extends Phaser.Scene {
     });
     const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive();
     switchButton.on('pointerdown', () => {
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.scene.start("PomodoroScene", { userId: this.userId });
     });
   }
@@ -318,6 +320,7 @@ export default class BuildScene extends Phaser.Scene {
       .setAlpha(0);
 
     hitZone.on("pointerdown", () => {
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.toggleDropdown();
     });
   }
@@ -438,6 +441,7 @@ export default class BuildScene extends Phaser.Scene {
       });
 
       zone.on("pointerdown", () => {
+        this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
         this.handleMapSelect(name);
       });
 
@@ -486,6 +490,7 @@ export default class BuildScene extends Phaser.Scene {
     });
 
     newZone.on("pointerdown", () => {
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.handleNewMap();
     });
 

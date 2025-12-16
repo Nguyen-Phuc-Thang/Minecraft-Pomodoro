@@ -16,7 +16,7 @@ export default class PomodoroScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.userId = data.userId;  
+        this.userId = data.userId;
         console.log("userId in PomodoroScene:", this.userId);
     }
 
@@ -70,7 +70,7 @@ export default class PomodoroScene extends Phaser.Scene {
 
         this.load.audio("woodenButtonClick", "assets/sounds/sfx/wooden_button_click.mp3");
         this.load.audio("clockTick", "assets/sounds/sfx/clock_tick.mp3");
-    
+
         this.load.html('settings-html', 'src/ui/settings.html');
     }
 
@@ -246,7 +246,7 @@ export default class PomodoroScene extends Phaser.Scene {
             fontWeight: 'bold'
         }).setOrigin(0, 0.5);
 
-        this.settingsDialog = new SettingsDialog(this, WIDTH / 2, HEIGHT / 2);        
+        this.settingsDialog = new SettingsDialog(this, WIDTH / 2, HEIGHT / 2);
 
         settingButton.on('pointerdown', () => {
             console.log("Toggling settings dialog");
@@ -276,9 +276,8 @@ export default class PomodoroScene extends Phaser.Scene {
         //Switch mode 
         const switchButton = this.add.sprite(WIDTH / 2, 35, "pomodoroMode").setOrigin(0.5).setScale(3).setInteractive();
         switchButton.on('pointerdown', () => {
-            this.scene.start("PreloadScene", { userId: this.userId });
-            console.log(audioSettings.sfxVolume);
             this.sound.play("woodenButtonClick", { volume: audioSettings.sfxVolume });
+            this.scene.start("PreloadScene", { userId: this.userId });
         });
 
         this.loadUserData();

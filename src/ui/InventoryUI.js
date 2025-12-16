@@ -1,5 +1,5 @@
 import { audioSettings } from "../gameSettings.js";
-import Phaser from "phaser";
+
 
 export default class InventoryUI {
   preload() {
@@ -16,7 +16,7 @@ export default class InventoryUI {
     const width = scene.scale.width;
     const height = scene.scale.height;
 
-  const barLeft = 10;
+    const barLeft = 10;
     const barBottom = 10;
     const barWidth = 5268;
     const barHeight = 636;
@@ -88,7 +88,7 @@ export default class InventoryUI {
 
     this.buyButton.on("pointerdown", () => {
       this._redrawBuyButton("pressed");
-      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
+      this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.buyButton.on("pointerup", () => {
@@ -184,7 +184,7 @@ export default class InventoryUI {
           const selected =
             self.hotbarUI.getSelectedItem && self.hotbarUI.getSelectedItem();
           const price = selected?.price ?? 0;
-
+          self.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
           self.updateBuyButtonLabel(price);
         }
       });
@@ -199,6 +199,7 @@ export default class InventoryUI {
       const selectedItem =
         this.hotbarUI.getSelectedItem && this.hotbarUI.getSelectedItem();
       const price = selectedItem?.price ?? 0;
+      this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.updateBuyButtonLabel(price);
     });
   }

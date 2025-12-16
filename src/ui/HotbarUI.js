@@ -1,3 +1,5 @@
+import { audioSettings } from "../gameSettings.js";
+
 export default class HotbarUI {
 
   preload() {
@@ -74,7 +76,9 @@ export default class HotbarUI {
         const selectedItem = this.getSelectedItem();
         const price = selectedItem?.price ?? 0;
 
+        this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
         this.scene.inventoryUI.updateBuyButtonLabel(price);
+
       });
 
       this.hotbarSlots.push(zone);
@@ -133,7 +137,7 @@ export default class HotbarUI {
       this.isBuildMode = !this.isBuildMode;
       this.currentTool = this.isBuildMode ? "build" : "remove";
       this._redrawBuildModeButton("pressed");
-      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
+      this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.buildModeButton.on("pointerup", () => {
@@ -172,7 +176,7 @@ export default class HotbarUI {
 
     this.inventoryButton.on("pointerdown", () => {
       this._redrawInventoryButton("pressed", "INVENTORY");
-      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
+      this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.inventoryButton.on("pointerup", () => {
@@ -335,5 +339,5 @@ export default class HotbarUI {
     }
   }
 
-  create() {}
+  create() { }
 }

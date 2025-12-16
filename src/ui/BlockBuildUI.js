@@ -1,3 +1,5 @@
+import { audioSettings } from "../gameSettings.js";
+
 export default class BlockBuildUI {
   constructor(scene, hotbarUI) {
     this.scene = scene;
@@ -60,6 +62,7 @@ export default class BlockBuildUI {
           zone.on("pointerdown", () => {
             const cell = this.getCell(zone.gridX, zone.gridY);
             if (!cell || cell.type === "bedrock") return;
+            this.scene.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
             if (this.onCellClick) {
               this.onCellClick({
                 x: zone.gridX,
