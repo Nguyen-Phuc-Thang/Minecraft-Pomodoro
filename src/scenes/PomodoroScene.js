@@ -97,7 +97,7 @@ export default class PomodoroScene extends Phaser.Scene {
 
         // Numbers
         const distanceFromFirstQuartile = [-175, -75, 75, 175];
-        const preloadTime = ["num_0", "num_0", "num_1", "num_1"];
+        const preloadTime = ["num_0", "num_0", "num_0", "num_0"];
 
 
         this.timerDigits = [];
@@ -105,8 +105,8 @@ export default class PomodoroScene extends Phaser.Scene {
         this.breakDigits = [];
         for (let i = 0; i < 4; i++) {
             this.timerDigits.push(this.add.image(numberFrames[i].x, numberFrames[i].y, preloadTime[i]).setOrigin(0.5));
-            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_5" : "num_0")).setOrigin(0.5).setScale(0.75));
-            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_1" : "num_0")).setOrigin(0.5).setScale(0.75));
+            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
+            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
         }
 
         this.focusColon = this.add.image(WIDTH / 5, HEIGHT - 125, "colon").setOrigin(0.5).setScale(0.75);

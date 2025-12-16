@@ -337,7 +337,9 @@ export default class HotbarUI {
           textObj.setVisible(true);
         }
       } else {
+        console.log("Clearing hotbar slot", i, "text object");
         if (textObj) {
+          textObj.setText(String(""));
           textObj.destroy();
           this.hotbarCountTexts[i] = null;
         }

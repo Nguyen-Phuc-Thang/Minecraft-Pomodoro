@@ -29,6 +29,7 @@ export default class ItemSystem {
       this.hotbarItemSprites[slotIndex] = null;
     }
     this.hotbarItems[slotIndex] = null;
+    this.hotbarUI.setSlotItem(slotIndex, null);
   }
 
   equipFromInventory(icon) {
