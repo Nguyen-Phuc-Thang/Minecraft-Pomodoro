@@ -274,7 +274,7 @@ export default class PomodoroScene extends Phaser.Scene {
             this.accumulatedRewardSeconds = 0;
             this.isFocusTime = true;
             this.timerStarted = true;
-        })
+        }
 
         //Switch mode 
         const switchButton = this.add.sprite(WIDTH / 2, 35, "pomodoroMode").setOrigin(0.5).setScale(3).setInteractive();
