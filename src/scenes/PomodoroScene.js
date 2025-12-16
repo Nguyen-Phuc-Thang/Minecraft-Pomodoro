@@ -16,7 +16,7 @@ export default class PomodoroScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.userId = data.userId;  
+        this.userId = data.userId;
         console.log("userId in PomodoroScene:", this.userId);
     }
 
@@ -97,14 +97,16 @@ export default class PomodoroScene extends Phaser.Scene {
 
         // Numbers
         const distanceFromFirstQuartile = [-175, -75, 75, 175];
-        const preloadTime = ["num_0", "num_0", "num_0", "num_0"];
+        const preloadTime = ["num_0", "num_0", "num_1", "num_1"];
+
+
         this.timerDigits = [];
         this.focusDigits = [];
         this.breakDigits = [];
         for (let i = 0; i < 4; i++) {
             this.timerDigits.push(this.add.image(numberFrames[i].x, numberFrames[i].y, preloadTime[i]).setOrigin(0.5));
-            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
-            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, "num_0").setOrigin(0.5).setScale(0.75));
+            this.focusDigits.push(this.add.image(WIDTH / 5 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_5" : "num_0")).setOrigin(0.5).setScale(0.75));
+            this.breakDigits.push(this.add.image(WIDTH / 5 * 4 + distanceFromFirstQuartile[i], HEIGHT - 125, (i == 0 ? "num_1" : "num_0")).setOrigin(0.5).setScale(0.75));
         }
 
         this.focusColon = this.add.image(WIDTH / 5, HEIGHT - 125, "colon").setOrigin(0.5).setScale(0.75);
@@ -258,10 +260,11 @@ export default class PomodoroScene extends Phaser.Scene {
         this.timerStarted = false;
         this.remainingFocusSeconds = this.getRemainingSeconds(this.timerDigits) + 1;
         this.remainingBreakSeconds = 0;
-        this.focusInterval = 0;
+        this.focusInterval = 10;
         this.breakInterval = 0;
         this.isFocusTime = true;
-        this.startButton = createButton(WIDTH / 2, HEIGHT - 125, "startButton", "startButtonPressed", () => {
+
+        const startButtonAction = () => {
             for (let i = 0; i < 4; i++) this.timerDigits[i].setTexture(this.focusDigits[i].texture.key);
             this.focusInterval = this.getRemainingSeconds(this.focusDigits) + 1;
             this.breakInterval = this.getRemainingSeconds(this.breakDigits) + 1;
@@ -282,6 +285,7 @@ export default class PomodoroScene extends Phaser.Scene {
         });
 
         this.loadUserData();
+        this.events.on("wake", this.loadUserData, this);
     }
 
     update(time, delta) {
@@ -361,19 +365,35 @@ export default class PomodoroScene extends Phaser.Scene {
         this.coinAmountText.setText(String(this.coinAmount));
     }
 
-    async rewardUserRealtime() {
-        this.coinAmount += 1;
-        this.coinAmountText.setText(String(this.coinAmount));
 
+    async rewardUserRealtime() {
         if (!this.userId) return;
 
         const userRef = doc(db, "users", this.userId);
+
         try {
+            const snap = await getDoc(userRef);
+
+            if (!snap.exists()) {
+                console.warn("User document missing:", this.userId);
+                return;
+            }
+
+            const data = snap.data();
+            const currentMoney = data.money || 0;
+
+            const newMoney = currentMoney + 1;
+
+            this.coinAmount = newMoney;
+            this.coinAmountText.setText(String(newMoney));
+
             await updateDoc(userRef, {
-                money: this.coinAmount
+                money: newMoney
             });
+
         } catch (err) {
             console.error("Failed to update money:", err);
         }
     }
+
 }   

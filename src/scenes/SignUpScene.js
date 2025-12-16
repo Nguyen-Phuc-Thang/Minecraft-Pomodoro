@@ -124,7 +124,7 @@ export default class SignUpScene extends Phaser.Scene {
 
     async createUserData(uid, email) {
         console.log("Creating user data for:", uid);
-        const initialInventory = BLOCK_CATALOG.map(block => ({ type: block.type, count: 0 }));
+        const initialInventory = BLOCK_CATALOG.map(block => ({ type: block.type, count: 0, price: block.price }));
 
         await setDoc(doc(db, "users", uid), {
             email,
