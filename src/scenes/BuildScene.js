@@ -12,6 +12,8 @@ import HotbarUI from "../ui/HotbarUI.js";
 import InventoryUI from "../ui/InventoryUI.js";
 import ItemSystem from "../systems/ItemSystem.js";
 import BlockBuildUI from "../ui/BlockBuildUI.js";
+import SettingsDialog from "../ui/SettingsDialog.js";
+import { audioSettings } from "../gameSettings.js";
 
 export default class BuildScene extends Phaser.Scene {
   constructor() {
@@ -21,6 +23,10 @@ export default class BuildScene extends Phaser.Scene {
     this.currentMapName = "default";
     this.mapsCache = {};
     this.mapNames = [];
+  }
+
+  preload() {
+    this.load.audio("minecraft_button_click", "assets/sounds/sfx/minecraft_button_click.mp3");
   }
 
   async loadInventoryFromDB() {
@@ -234,10 +240,12 @@ export default class BuildScene extends Phaser.Scene {
         console.error(err);
       }
     });
+
     const createButton = (x, y, key, keyPressed, action) => {
       const button = this.add.sprite(x, y, key).setOrigin(0.5).setScale(3).setInteractive();
       button.on('pointerdown', () => {
         button.setTexture(keyPressed);
+        this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
         action();
       });
       button.on('pointerup', () => {
@@ -246,7 +254,11 @@ export default class BuildScene extends Phaser.Scene {
       return button;
     }
 
-    const settingButton = createButton(screen.width - 75, 35, "buildmode_button_setting", "buildmode_button_setting_pressed", () => { });
+
+    this.settingsDialog = new SettingsDialog(this, this.scale.width / 2, this.scale.height / 2);
+    const settingButton = createButton(screen.width - 75, 35, "buildmode_button_setting", "buildmode_button_setting_pressed", () => {
+      this.settingsDialog.toggle();
+    });
     const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive();
     switchButton.on('pointerdown', () => {
       this.scene.start("PomodoroScene", { userId: this.userId });

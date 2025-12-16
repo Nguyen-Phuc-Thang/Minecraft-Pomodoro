@@ -1,6 +1,7 @@
 export default class HotbarUI {
 
-  preload() {}
+  preload() {
+  }
 
   constructor(scene, itemSystem) {
     this.scene = scene;
@@ -137,6 +138,7 @@ export default class HotbarUI {
       this.isBuildMode = !this.isBuildMode;
       this.currentTool = this.isBuildMode ? "build" : "remove";
       this._redrawBuildModeButton("pressed");
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.buildModeButton.on("pointerup", () => {
@@ -175,6 +177,7 @@ export default class HotbarUI {
 
     this.inventoryButton.on("pointerdown", () => {
       this._redrawInventoryButton("pressed", "INVENTORY");
+      this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
     });
 
     this.inventoryButton.on("pointerup", () => {
