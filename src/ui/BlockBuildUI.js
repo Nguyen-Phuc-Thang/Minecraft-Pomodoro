@@ -137,6 +137,18 @@ export default class BlockBuildUI {
     if (!visible) this.hoverHighlight.setVisible(false);
   }
 
+  setInteractiveEnabled(enabled) {
+    for (let y = 0; y < this.mapRows; y++) {
+      for (let x = 0; x < this.mapCols; x++) {
+        const cell = this.grid[y][x];
+        if (!cell?.zone) continue;
+        if (enabled) cell.zone.setInteractive({ useHandCursor: true });
+        else cell.zone.disableInteractive();
+      }
+    }
+    if (!enabled) this.hoverHighlight.setVisible(false);
+  }
+
   removeBlock(x, y) {
     const cell = this.getCell(x, y);
     if (!cell) return false;

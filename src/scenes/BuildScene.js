@@ -53,9 +53,9 @@ export default class BuildScene extends Phaser.Scene {
       this.mapNames = Object.keys(this.mapsCache);
       this.inventoryUI.setItems([]);
       this.updateMoneyUI();
+      this.blockBuildUI.loadMapData(this.mapsCache[this.currentMapName]);
       this.refreshMapDropdownLabel();
       this.refreshMapOptions();
-      this.blockBuildUI.loadMapData(this.mapsCache[this.currentMapName]);
       this._initCamera();
       return;
     }
@@ -152,8 +152,6 @@ export default class BuildScene extends Phaser.Scene {
     this.inventoryUI = new InventoryUI(this, this.itemSystem, this.hotbarUI);
     this.blockBuildUI = new BlockBuildUI(this, this.hotbarUI);
 
-    this._pinUI();
-
     this.loadInventoryFromDB();
 
     this.itemSystem.registerHotbarUI(this.hotbarUI);
@@ -226,29 +224,50 @@ export default class BuildScene extends Phaser.Scene {
     });
 
     const createButton = (x, y, key, keyPressed, action) => {
-      const button = this.add.sprite(x, y, key).setOrigin(0.5).setScale(3).setInteractive().setDepth(1001);
-      button.setScrollFactor(0);
-      button.on("pointerdown", () => {
+      const button = this.add
+        .sprite(x, y, key)
+        .setOrigin(0.5)
+        .setScale(3)
+        .setInteractive()
+        .setDepth(3000)
+        .setScrollFactor(0);
+
+      button.on("pointerdown", (pointer, lx, ly, event) => {
+        if (event && event.stopPropagation) event.stopPropagation();
         button.setTexture(keyPressed);
         this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
         action();
       });
+
       button.on("pointerup", () => {
         button.setTexture(key);
       });
+
       return button;
     };
 
     this.settingsDialog = new SettingsDialog(this, this.scale.width / 2, this.scale.height / 2);
-    if (this.settingsDialog?.container) this.settingsDialog.container.setScrollFactor(0);
 
-    const settingButton = createButton(this.scale.width - 75, 35, "buildmode_button_setting", "buildmode_button_setting_pressed", () => {
-      this.settingsDialog.toggle();
-    });
+    const settingButton = createButton(
+      this.scale.width - 75,
+      35,
+      "buildmode_button_setting",
+      "buildmode_button_setting_pressed",
+      () => {
+        this.settingsDialog.toggle();
+      }
+    );
 
-    const switchButton = this.add.sprite(this.scale.width / 2, 35, "buildMode").setOrigin(0.5).setScale(3).setInteractive().setDepth(1001);
-    switchButton.setScrollFactor(0);
-    switchButton.on("pointerdown", () => {
+    const switchButton = this.add
+      .sprite(this.scale.width / 2, 35, "buildMode")
+      .setOrigin(0.5)
+      .setScale(3)
+      .setInteractive()
+      .setDepth(3000)
+      .setScrollFactor(0);
+
+    switchButton.on("pointerdown", (pointer, lx, ly, event) => {
+      if (event && event.stopPropagation) event.stopPropagation();
       this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.scene.start("PomodoroScene", { userId: this.userId });
       this.scene.switch("PomodoroScene", { userId: this.userId });
@@ -274,6 +293,7 @@ export default class BuildScene extends Phaser.Scene {
     this.input.on("pointerdown", (p) => {
       if (!p.leftButtonDown()) return;
       if (this.inventoryUI?.isOpen && this.inventoryUI.isOpen()) return;
+      if (this.mapOptionsContainer?.visible) return;
       if (p.y <= 80) return;
       this._dragging = true;
       this._dragLastX = p.x;
@@ -298,57 +318,17 @@ export default class BuildScene extends Phaser.Scene {
     });
   }
 
-  _pinUI() {
-    const pin = (obj) => {
-      if (!obj || !obj.setScrollFactor) return;
-      obj.setScrollFactor(0);
-    };
-
-    pin(this.moneyContainer);
-    pin(this.mapHeaderContainer);
-    pin(this.mapOptionsContainer);
-
-    pin(this.hotbarUI?.slotBar);
-    pin(this.hotbarUI?.slotSelection);
-    pin(this.hotbarUI?.buildModeButton);
-    pin(this.hotbarUI?.inventoryButton);
-    pin(this.hotbarUI?.buildModeBg);
-    pin(this.hotbarUI?.buildModeLabel);
-    pin(this.hotbarUI?.inventoryBg);
-    pin(this.hotbarUI?.inventoryLabel);
-
-    if (Array.isArray(this.hotbarUI?.hotbarSlots)) {
-      this.hotbarUI.hotbarSlots.forEach(pin);
-    }
-    if (Array.isArray(this.hotbarUI?.hotbarItemSprites)) {
-      this.hotbarUI.hotbarItemSprites.forEach(pin);
-    }
-    if (Array.isArray(this.hotbarUI?.hotbarCountTexts)) {
-      this.hotbarUI.hotbarCountTexts.forEach(pin);
-    }
-
-    pin(this.inventoryUI?.inventoryPanel);
-    pin(this.inventoryUI?.buyButton);
-    pin(this.inventoryUI?.buyBg);
-    pin(this.inventoryUI?.buyPriceText);
-    pin(this.inventoryUI?.buyLabelText);
-
-    if (Array.isArray(this.inventoryUI?.inventoryItems)) {
-      this.inventoryUI.inventoryItems.forEach((icon) => {
-        pin(icon);
-        pin(icon?.countText);
-      });
-    }
-  }
-
   createMapUI() {
     const padding = 16;
     const width = 200;
     const height = 40;
 
-    this.mapHeaderContainer = this.add.container(padding + 870, padding).setDepth(1001);
+    const x = this.scale.width - padding - width;
+    const y = padding;
 
-    this.mapDropdownBg = this.add.graphics();
+    this.mapHeaderContainer = this.add.container(x - 200, y).setDepth(2500).setScrollFactor(0);
+
+    this.mapDropdownBg = this.add.graphics().setScrollFactor(0).setDepth(2500);
     this.drawDropdownHeader(false);
     this.mapHeaderContainer.add(this.mapDropdownBg);
 
@@ -358,7 +338,9 @@ export default class BuildScene extends Phaser.Scene {
         color: this.uiStyle.textColor,
         fontStyle: "bold"
       })
-      .setOrigin(0, 0.5);
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(2500);
     this.mapHeaderContainer.add(this.mapDropdownLabel);
 
     this.arrowIcon = this.add
@@ -366,18 +348,33 @@ export default class BuildScene extends Phaser.Scene {
         font: "14px Minecraft",
         color: this.uiStyle.textColor
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(2500);
     this.mapHeaderContainer.add(this.arrowIcon);
 
-    const hitZone = this.add.zone(width / 2, height / 2, width, height).setInteractive({ useHandCursor: true });
+    const hitZone = this.add
+      .zone(width / 2, height / 2, width, height)
+      .setInteractive({ useHandCursor: true })
+      .setScrollFactor(0)
+      .setDepth(2600);
     this.mapHeaderContainer.add(hitZone);
 
-    this.mapOptionsContainer = this.add.container(padding + 870, padding + height + 5).setDepth(1000).setVisible(false).setAlpha(0);
+    this.mapOptionsContainer = this.add
+      .container(x - 200, y + height + 5)
+      .setDepth(2601)
+      .setVisible(false)
+      .setAlpha(0)
+      .setScrollFactor(0);
 
-    hitZone.on("pointerdown", () => {
+    hitZone.on("pointerdown", (pointer, lx, ly, event) => {
+      if (event && event.stopPropagation) event.stopPropagation();
       this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.toggleDropdown();
     });
+
+    this.refreshMapOptions();
+    this.refreshMapDropdownLabel();
   }
 
   drawDropdownHeader(isOpen) {
@@ -393,37 +390,26 @@ export default class BuildScene extends Phaser.Scene {
 
     if (!isVisible) {
       this.mapOptionsContainer.setVisible(true);
-      this.mapOptionsContainer.y = 16 + 40 + 5 - 10;
-
-      this.tweens.add({
-        targets: this.mapOptionsContainer,
-        y: 16 + 40 + 5,
-        alpha: 1,
-        duration: 200,
-        ease: "Power2"
-      });
+      this.mapOptionsContainer.setAlpha(1);
 
       this.tweens.add({
         targets: this.arrowIcon,
         angle: 180,
         duration: 200
       });
+
+      if (this.blockBuildUI) this.blockBuildUI.setInteractiveEnabled(false);
     } else {
-      this.tweens.add({
-        targets: this.mapOptionsContainer,
-        alpha: 0,
-        y: 16 + 40 + 5 - 10,
-        duration: 150,
-        onComplete: () => {
-          this.mapOptionsContainer.setVisible(false);
-        }
-      });
+      this.mapOptionsContainer.setVisible(false);
+      this.mapOptionsContainer.setAlpha(0);
 
       this.tweens.add({
         targets: this.arrowIcon,
         angle: 0,
         duration: 200
       });
+
+      if (this.blockBuildUI) this.blockBuildUI.setInteractiveEnabled(true);
     }
   }
 
@@ -443,10 +429,10 @@ export default class BuildScene extends Phaser.Scene {
     const itemHeight = 35;
     const padding = 5;
 
-    const totalItems = this.mapNames.length + 1;
+    const totalItems = (this.mapNames?.length || 0) + 1;
     const totalHeight = totalItems * itemHeight + padding * 2;
 
-    const bg = this.add.graphics();
+    const bg = this.add.graphics().setScrollFactor(0).setDepth(2601);
     bg.fillStyle(this.uiStyle.baseColor, 1);
     bg.lineStyle(1, this.uiStyle.accentColor, 1);
     bg.fillRoundedRect(0, 0, width, totalHeight, this.uiStyle.cornerRadius);
@@ -455,12 +441,12 @@ export default class BuildScene extends Phaser.Scene {
 
     let currentY = padding;
 
-    this.mapNames.forEach((name) => {
+    (this.mapNames || []).forEach((name) => {
       const isSelected = name === this.currentMapName;
 
-      const row = this.add.container(0, currentY);
+      const row = this.add.container(0, currentY).setScrollFactor(0).setDepth(2601);
 
-      const rowBg = this.add.graphics();
+      const rowBg = this.add.graphics().setScrollFactor(0).setDepth(2601);
       if (isSelected) {
         rowBg.fillStyle(this.uiStyle.selectedColor, 1);
         rowBg.fillRect(2, 0, width - 4, itemHeight);
@@ -472,10 +458,16 @@ export default class BuildScene extends Phaser.Scene {
           font: this.uiStyle.font,
           color: isSelected ? "#ffffff" : this.uiStyle.mutedTextColor
         })
-        .setOrigin(0, 0.5);
+        .setOrigin(0, 0.5)
+        .setScrollFactor(0)
+        .setDepth(2601);
       row.add(text);
 
-      const zone = this.add.zone(width / 2, itemHeight / 2, width, itemHeight).setInteractive({ useHandCursor: true });
+      const zone = this.add
+        .zone(width / 2, itemHeight / 2, width, itemHeight)
+        .setInteractive({ useHandCursor: true })
+        .setScrollFactor(0)
+        .setDepth(2602);
 
       zone.on("pointerover", () => {
         if (!isSelected) {
@@ -493,7 +485,8 @@ export default class BuildScene extends Phaser.Scene {
         }
       });
 
-      zone.on("pointerdown", () => {
+      zone.on("pointerdown", (pointer, lx, ly, event) => {
+        if (event && event.stopPropagation) event.stopPropagation();
         this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
         this.handleMapSelect(name);
       });
@@ -503,22 +496,40 @@ export default class BuildScene extends Phaser.Scene {
       currentY += itemHeight;
     });
 
-    const divider = this.add.graphics();
-    divider.lineStyle(1, "#ffffff", 0.25);
+    const divider = this.add.graphics().setScrollFactor(0).setDepth(2601);
+    divider.lineStyle(1, 0xffffff, 0.25);
     divider.lineBetween(10, currentY, width - 10, currentY);
     this.mapOptionsContainer.add(divider);
 
-    const newMapRow = this.add.container(0, currentY);
-    const newMapBg = this.add.graphics();
+    const newMapRow = this.add.container(0, currentY).setScrollFactor(0).setDepth(2601);
+    const newMapBg = this.add.graphics().setScrollFactor(0).setDepth(2601);
     newMapRow.add(newMapBg);
 
-    const plusIcon = this.add.text(15, itemHeight / 2, "+", { font: "bold 20px Minecraft", color: "#00aa00" }).setOrigin(0, 0.5);
+    const plusIcon = this.add
+      .text(15, itemHeight / 2, "+", {
+        font: "bold 20px Minecraft",
+        color: "#00aa00"
+      })
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(2601);
 
-    const newMapText = this.add.text(35, itemHeight / 2, "Create New Map", { font: this.uiStyle.font, color: "#00aa00" }).setOrigin(0, 0.5);
+    const newMapText = this.add
+      .text(35, itemHeight / 2, "Create New Map", {
+        font: this.uiStyle.font,
+        color: "#00aa00"
+      })
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(2601);
 
     newMapRow.add([plusIcon, newMapText]);
 
-    const newZone = this.add.zone(width / 2, itemHeight / 2, width, itemHeight).setInteractive({ useHandCursor: true });
+    const newZone = this.add
+      .zone(width / 2, itemHeight / 2, width, itemHeight)
+      .setInteractive({ useHandCursor: true })
+      .setScrollFactor(0)
+      .setDepth(2602);
 
     newZone.on("pointerover", () => {
       newMapBg.clear();
@@ -530,15 +541,14 @@ export default class BuildScene extends Phaser.Scene {
       newMapBg.clear();
     });
 
-    newZone.on("pointerdown", () => {
+    newZone.on("pointerdown", (pointer, lx, ly, event) => {
+      if (event && event.stopPropagation) event.stopPropagation();
       this.sound.play("minecraft_button_click", { volume: audioSettings.sfxVolume });
       this.handleNewMap();
     });
 
     newMapRow.add(newZone);
     this.mapOptionsContainer.add(newMapRow);
-
-    this._pinUI();
   }
 
   handleMapSelect(name) {
@@ -610,9 +620,9 @@ export default class BuildScene extends Phaser.Scene {
     const innerBorder = 0x373737;
     const fillColor = 0xc6c6c6;
 
-    this.moneyContainer = this.add.container(x, y).setDepth(1000);
+    this.moneyContainer = this.add.container(x, y).setDepth(2000).setScrollFactor(0);
 
-    const leftG = this.add.graphics();
+    const leftG = this.add.graphics().setScrollFactor(0);
     leftG.fillStyle(outerBorder, 1);
     leftG.fillRect(0, -boxHeight / 2, symbolWidth, boxHeight);
     leftG.fillStyle(innerBorder, 1);
@@ -621,7 +631,7 @@ export default class BuildScene extends Phaser.Scene {
     leftG.fillRect(2, -boxHeight / 2 + 2, symbolWidth - 4, boxHeight - 4);
     this.moneyContainer.add(leftG);
 
-    const rightG = this.add.graphics();
+    const rightG = this.add.graphics().setScrollFactor(0);
     rightG.fillStyle(outerBorder, 1);
     rightG.fillRect(symbolWidth + 4, -boxHeight / 2, valueWidth, boxHeight);
     rightG.fillStyle(innerBorder, 1);
@@ -630,21 +640,25 @@ export default class BuildScene extends Phaser.Scene {
     rightG.fillRect(symbolWidth + 6, -boxHeight / 2 + 2, valueWidth - 4, boxHeight - 4);
     this.moneyContainer.add(rightG);
 
-    this.moneySymbolText = this.add.text(symbolWidth / 2, 0, "$", {
-      fontFamily: "Minecraft",
-      fontSize: "18px",
-      color: "#303030"
-    }).setOrigin(0.5);
+    this.moneySymbolText = this.add
+      .text(symbolWidth / 2, 0, "$", {
+        fontFamily: "Minecraft",
+        fontSize: "18px",
+        color: "#303030"
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0);
     this.moneyContainer.add(this.moneySymbolText);
 
-    this.moneyValueText = this.add.text(symbolWidth + 4 + valueWidth / 2, 0, String(this.money), {
-      fontFamily: "Minecraft",
-      fontSize: "18px",
-      color: "#303030"
-    }).setOrigin(0.5);
+    this.moneyValueText = this.add
+      .text(symbolWidth + 4 + valueWidth / 2, 0, String(this.money), {
+        fontFamily: "Minecraft",
+        fontSize: "18px",
+        color: "#303030"
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0);
     this.moneyContainer.add(this.moneyValueText);
-
-    this.moneyContainer.setScrollFactor(0);
   }
 
   updateMoneyUI() {
@@ -653,9 +667,3 @@ export default class BuildScene extends Phaser.Scene {
     }
   }
 }
-
-
-
-
-
-
