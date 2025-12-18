@@ -6,18 +6,18 @@ export default class LoginScene extends Phaser.Scene {
     constructor() {
         super("LoginScene");
     }
-    
+
     init(data) {
-        this.userId = data.userId;  
+        this.userId = data.userId;
     }
 
-    preload() {}
+    preload() { }
 
     create() {
         const WIDTH = this.scale.width;
         const HEIGHT = this.scale.height;
         this.background = this.add.rectangle(-1, 0, this.scale.width, this.scale.height, "0xA9AAA9").setOrigin(0);
-        
+
         // Login form
         const loginForm = this.add.dom(WIDTH / 2, HEIGHT / 2).createFromHTML(`
             <div style="
@@ -51,7 +51,7 @@ export default class LoginScene extends Phaser.Scene {
                 " />
                 
                 <h2 style="font-family:Arial,sans-sefif; font-size:16px; margin-top:30px; margin-left:15px;">Password</h2>
-                <input type="text" id="password" name="password" placeholder="Enter password" style="
+                <input type="password" id="password" name="password" placeholder="Enter password" style="
                     width: 90%;
                     padding: 12px 20px;
                     margin-top: 5px;
@@ -81,7 +81,7 @@ export default class LoginScene extends Phaser.Scene {
                 </p>
 
             </div>
-        `) 
+        `)
 
         // Add events to buttons
         const loginButton = loginForm.getChildByID('loginButton');
@@ -93,7 +93,7 @@ export default class LoginScene extends Phaser.Scene {
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     // Signed in
-                    const user = userCredential.user;  
+                    const user = userCredential.user;
                     console.log("Login successful");
                     this.scene.start("PomodoroScene", { userId: user.uid });
                 })
@@ -104,7 +104,7 @@ export default class LoginScene extends Phaser.Scene {
                     console.log(errorMessage);
                     console.log("Login failed");
                     this.scene.start("PomodoroScene");
-                });            
+                });
         });
 
         const linkSignUp = loginForm.getChildByID('linkSignUp');
@@ -114,6 +114,6 @@ export default class LoginScene extends Phaser.Scene {
     }
 
     update() {
-        
+
     }
 }
