@@ -71,7 +71,7 @@ export default class PomodoroScene extends Phaser.Scene {
         this.load.audio("woodenButtonClick", "assets/sounds/sfx/wooden_button_click.mp3");
         this.load.audio("clockTick", "assets/sounds/sfx/clock_tick.mp3");
 
-        this.load.html('settings-html', 'src/ui/settings.html');
+        this.load.html('settings-html', 'ui/settings.html');
     }
 
     create() {
